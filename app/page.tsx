@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+type Block = { endedAt: number; minutes: number };
+
 function format(totalSeconds: number) {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
@@ -9,35 +11,38 @@ function format(totalSeconds: number) {
 }
 
 export default function Home() {
+  const [length, setLengthState] = useState(25);
   const [secondsLeft, setSecondsLeft] = useState(25 * 60);
   const [endsAt, setEndsAt] = useState<number | null>(null);
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const running = endsAt !== null;
 
   useEffect(() => {
     if (endsAt === null) return;
-    const tick = () => {
-      const left = Math.max(0, Math.round((endsAt - Date.now()) / 1000));
-      setSecondsLeft(left);
-      if (left === 0) setEndsAt(null);
-    };
-    tick(); 
+    const end = endsAt;
     const id = setInterval(tick, 250);
+    function tick() {
+      const left = Math.max(0, Math.round((end - Date.now()) / 1000));
+      setSecondsLeft(left);
+      if (left === 0) {
+        clearInterval(id);
+        setEndsAt(null);
+        setBlocks((list) => [...list, { endedAt: Date.now(), minutes: length }]);
+      }
+    }
+    tick();
     return () => clearInterval(id);
-  }, [endsAt]);
+  }, [endsAt, length]);
 
   function startPause() {
     if (running) setEndsAt(null);
-    else setEndsAt(Date.now() + secondsLeft * 1000);
-  }
-
-  function addMinute() {
-    if (running) setEndsAt(endsAt + 60_000);
-    else setSecondsLeft(secondsLeft + 60);
+    else if (secondsLeft > 0) setEndsAt(Date.now() + secondsLeft * 1000);
   }
 
   function setLength(minutes: number) {
     setEndsAt(null);
-    setSecondsLeft(minutes * 60);
+    setLengthState(minutes);
+    setSecondsLeft(Math.round(minutes * 60));
   }
 
   return (
@@ -46,8 +51,17 @@ export default function Home() {
       <h1>{format(secondsLeft)}</h1>
       <button onClick={startPause}>{running ? "Pause" : "Start"}</button>
       <button onClick={() => setLength(50)}>50 minutes</button>
-      <button onClick={addMinute}>+1 minute</button>
       <button onClick={() => setLength(25)}>Reset</button>
+      <button onClick={() => setLength(0.1)}>Test (6 seconds)</button>
+
+      <h2>Today: {blocks.length} blocks</h2>
+      <ul>
+        {blocks.map((b) => (
+          <li key={b.endedAt}>
+            {b.minutes} min, finished at {new Date(b.endedAt).toLocaleTimeString()}
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }
