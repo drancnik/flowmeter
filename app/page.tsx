@@ -10,6 +10,7 @@ export default function Home() {
       <h1>{minutes}:00</h1>
       <button onClick={() => setMinutes(50)}>50 minutes</button>
       <button onClick={() => setMinutes(minutes + 1)}>+1 minute</button>
+      <button onClick={() => setMinutes(25)}>Reset</button>
     </main>
   );
 }
