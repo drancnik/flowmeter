@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "engines": {
-  "node": ">=22"
+    "node": ">=22"
   },
   "dependencies": {
     "next": "16.4.0",
@@ -24,6 +24,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
+    "supabase": "^2.120.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
