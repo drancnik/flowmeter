@@ -110,9 +110,9 @@ button,input,textarea{font:inherit;color:inherit}
 .field{display:flex;flex-direction:column;gap:8px}
 .lbl{font-size:13.5px;font-weight:700}
 .hint{font-size:13px;color:var(--muted);font-weight:400}
-input[type=text],textarea{width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 14px;font-size:16px;outline:none}
+input[type=text],input[type=email],input[type=password],textarea{width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 14px;font-size:16px;outline:none}
 textarea{resize:vertical;min-height:70px}
-input[type=text]:focus,input[type=number]:focus,textarea:focus{border-color:var(--ph);box-shadow:0 0 0 4px var(--ph-soft)}
+input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,input[type=number]:focus,textarea:focus{border-color:var(--ph);box-shadow:0 0 0 4px var(--ph-soft)}
 .len{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .len button,.seg button,.tags button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
 .len button:hover,.seg button:hover,.tags button:hover{transform:translateY(-1px)}
@@ -511,6 +511,19 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 <div class="modal" id="setModal" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
     <div class="sheet-head"><h2 id="setTitle">Settings</h2><button class="icon-btn" id="setClose" aria-label="Close">&#215;</button></div>
+    <div class="sec" id="authSec">
+      <h4>Account</h4>
+      <div id="authSigned" hidden>
+        <p class="hint" style="margin:0">Signed in as <span id="authEmail"></span></p>
+        <div class="row"><button class="btn ghost small" id="authSignOut" type="button">Sign out</button></div>
+      </div>
+      <div id="authForm">
+        <div class="field"><label class="lbl" for="authEmailIn">Email</label><input type="email" id="authEmailIn" autocomplete="email"></div>
+        <div class="field"><label class="lbl" for="authPassIn">Password</label><input type="password" id="authPassIn" autocomplete="current-password"></div>
+        <div class="row"><button class="btn small" id="authSignIn" type="button">Sign in</button><button class="btn ghost small" id="authSignUp" type="button">Create account</button></div>
+      </div>
+      <p class="err" id="authErr" hidden></p>
+    </div>
     <div class="sec">
       <h4>Goals</h4>
       <div class="field"><span class="lbl">Daily goal</span>
@@ -599,6 +612,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 <div class="sr" id="live" aria-live="polite"></div>
 <div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="toastAct" hidden></button></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 <script>
 (function(){
 "use strict";
@@ -1103,6 +1117,45 @@ function renderTable(D,demoOn){
   $('#sessTbl').innerHTML=h+'</tbody>';
 }
 
+/* account (Supabase auth only; data stays local) */
+const SUPABASE_URL='https://tdgufuwotovstrkbllwm.supabase.co';
+const SUPABASE_KEY='sb_publishable_9DKBpd2B0d31DFNTAP1rUw_NuKuOhn5';
+let authClient=null,authUser=null,authBusy=false;
+function renderAuthUI(){
+  if(!authClient)return;
+  const signed=!!authUser;
+  $('#authForm').hidden=signed;$('#authSigned').hidden=!signed;
+  if(signed)$('#authEmail').textContent=authUser.email||'';
+  if(signed){showAuthErr('');$('#authPassIn').value=''}
+}
+function setAuthBusy(busy){authBusy=busy;['#authSignIn','#authSignUp','#authSignOut'].forEach(s=>{const b=$(s);if(b)b.disabled=busy})}
+function showAuthErr(msg){const el=$('#authErr');if(msg){el.textContent=msg;el.hidden=false}else el.hidden=true}
+async function authAction(mode){
+  if(!authClient||authBusy)return;
+  const email=$('#authEmailIn').value.trim(),password=$('#authPassIn').value;
+  showAuthErr('');
+  if(!email)return showAuthErr('Enter your email.');
+  if(password.length<8)return showAuthErr('Password must be at least 8 characters.');
+  setAuthBusy(true);
+  const {error}=mode==='up'?await authClient.auth.signUp({email,password}):await authClient.auth.signInWithPassword({email,password});
+  setAuthBusy(false);
+  if(error)showAuthErr(error.message);
+}
+function initAuth(){
+  if(typeof supabase==='undefined'||!supabase.createClient){$('#authSec').hidden=true;return}
+  authClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const setUser=u=>{authUser=u;renderAuthUI()};
+  authClient.auth.getSession().then(({data:{session}})=>setUser(session&&session.user||null));
+  authClient.auth.onAuthStateChange((_e,session)=>setUser(session&&session.user||null));
+  $('#authSignIn').addEventListener('click',()=>authAction('in'));
+  $('#authSignUp').addEventListener('click',()=>authAction('up'));
+  $('#authSignOut').addEventListener('click',async()=>{
+    if(!authClient||authBusy)return;setAuthBusy(true);showAuthErr('');
+    const {error}=await authClient.auth.signOut();setAuthBusy(false);
+    if(error)showAuthErr(error.message);
+  });
+}
+
 /* settings */
 function renderSettings(){
   const st=S.settings;
@@ -1357,7 +1410,7 @@ document.addEventListener('keydown',e=>{
 /* boot */
 if(S.run&&S.run.phase==='focus'&&!S.run.pausedAt&&Date.now()>=S.run.endsAt)endWork(false,true);
 if(S.run&&S.run.phase==='break'&&Date.now()>=S.run.endsAt){S.run.phase='breakEnd';saveRun()}
-renderAll();store.init().then(()=>checkMilestone(true));setTimeout(()=>{if(!store.db)maybeOnboard()},1500);
+initAuth();renderAll();store.init().then(()=>checkMilestone(true));setTimeout(()=>{if(!store.db)maybeOnboard()},1500);
 })();
 </script>
 
