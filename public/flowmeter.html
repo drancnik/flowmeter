@@ -644,7 +644,7 @@ const S={
 };
 
 /* storage: browser + account, live across devices */
-let syncLabel='Saved in this browser.';
+let syncLabel='Saved in this browser. Sign in to sync across devices.';
 function setSync(t){syncLabel=t;const e=$('#syncState');if(e)e.textContent=t}
 S.del=ls.get('fm.del',{});
 const isDead=s=>{const d=S.del[s.id];return !!d&&d.u>=(s.u||0)};
@@ -656,52 +656,150 @@ function mergeSessions(list){let ch=false;const map=new Map(S.sessions.map(x=>[x
 let rerenderT=0;
 function softRender(){clearTimeout(rerenderT);rerenderT=setTimeout(()=>{if(!$('#edModal').hidden||!$('#setModal').hidden||!$('#obModal').hidden){softRender();return}renderAll()},250)}
 const store={
-  db:null,uid:null,chain:Promise.resolve(),unsub:null,
+  chain:Promise.resolve(),lastPull:0,hadUser:false,pullListeners:false,
   monthKey(ts){const d=new Date(ts);return 'm-'+d.getFullYear()+'-'+pad(d.getMonth()+1)},
-  ok(){setSync('Synced to your Claude account. Open this page on any device signed in to the same account.')},
-  fail(e){setSync(e&&e.code==='quota_exceeded'?'Account storage is full. New blocks are kept in this browser.':'Sync failed. Your blocks are kept in this browser and sync next time.')},
-  write(id,body){
-    if(!this.db)return;const path='data/users/'+this.uid+'/'+id;
-    this.chain=this.chain.then(()=>this.db.doc(path).set(body)).then(()=>this.ok()).catch(e=>this.fail(e));
+  ok(){setSync('Synced to your account.')},
+  fail(){setSync('Sync failed. Your blocks are kept in this browser and sync next time.')},
+  signedOut(){setSync('Saved in this browser. Sign in to sync across devices.')},
+  sb(){return authClient},
+  sessionToRow(s,opts){
+    const del=!!(opts&&opts.deleted),u=(opts&&opts.u!=null)?opts.u:(s.u||Date.now());
+    if(!del&&(!s||s.actual<=0))return null;
+    const start=s.start||0;
+    return{id:s.id,started_at:new Date(start).toISOString(),ended_at:new Date(s.end||start).toISOString(),planned_min:s.planned,worked_min:del?1:s.actual,extended_min:s.ext||0,ended_early:!!s.early,tag_id:s.tag||null,note:s.note||'',rating:s.rating==null?null:s.rating,break_planned_min:s.brkPlanned,break_actual_min:s.brkActual,break_overrun_min:s.brkOver,deleted:del,updated_at:u};
+  },
+  rowToSession(row){
+    return{id:row.id,start:new Date(row.started_at).getTime(),end:new Date(row.ended_at).getTime(),planned:row.planned_min,actual:row.worked_min,ext:row.extended_min||0,early:!!row.ended_early,tag:row.tag_id,note:row.note||'',rating:row.rating,brkPlanned:row.break_planned_min,brkActual:row.break_actual_min,brkOver:row.break_overrun_min,u:row.updated_at,label:'',mode:'manual',distractions:[]};
+  },
+  mergeRemoteRows(rows){
+    let ch=false;const live=[];
+    (rows||[]).forEach(row=>{
+      if(!row||!row.id)return;
+      if(row.deleted){
+        const k=this.monthKey(new Date(row.started_at).getTime()),u=row.updated_at||0;
+        if(!S.del[row.id]||u>S.del[row.id].u){S.del[row.id]={k,u};ch=true}
+      }else if(row.worked_min>0)live.push(this.rowToSession(row));
+    });
+    if(ch)ls.set('fm.del',S.del);
+    ch=mergeSessions(live)||ch;
+    return ch;
+  },
+  mergeRemoteSettings(us){
+    if(!us)return false;let ch=false;
+    if(us.settings&&(us.settings.u||0)>(S.settings.u||0)){S.settings=Object.assign({},defaults,us.settings);ch=true}
+    const it=us.reflections||{};
+    Object.keys(it).forEach(k=>{if(it[k]&&(!S.refl[k]||(it[k].u||0)>(S.refl[k].u||0))){S.refl[k]=it[k];ch=true}});
+    if(ch)ls.set('fm.refl',S.refl);
+    return ch;
+  },
+  async fetchAllBlocks(){
+    const sb=this.sb();if(!sb)throw new Error('no client');
+    const all=[];let from=0;
+    for(;;){
+      const {data,error}=await sb.from('blocks').select('*').range(from,from+999);
+      if(error)throw error;
+      if(data&&data.length)all.push.apply(all,data);
+      if(!data||data.length<1000)break;
+      from+=1000;
+    }
+    return all;
+  },
+  pushLocalDelta(rows,remoteRefl,remoteSettingsU){
+    const remoteIds=new Map(),remoteDel={};
+    (rows||[]).forEach(r=>{if(r.deleted)remoteDel[r.id]=r.updated_at||0;else remoteIds.set(r.id,r.updated_at||0)});
+    const dirty=new Set();
+    S.sessions.forEach(x=>{if(x.actual<=0)return;if(!remoteIds.has(x.id)||(x.u||0)>remoteIds.get(x.id))dirty.add(this.monthKey(x.start))});
+    Object.keys(S.del).forEach(i=>{if(!(i in remoteDel)||S.del[i].u>remoteDel[i])dirty.add(S.del[i].k)});
+    dirty.forEach(k=>this.saveMonth(k));
+    if(!remoteSettingsU||(S.settings.u||0)>remoteSettingsU)this.saveSettings();
+    if(Object.keys(S.refl).some(k=>!remoteRefl[k]||(S.refl[k].u||0)>(remoteRefl[k].u||0)))this.saveRefl();
+  },
+  async pull(force,push){
+    const sb=this.sb();if(!sb||!authUser)return;
+    const now=Date.now();
+    if(!force&&now-this.lastPull<30000)return;
+    this.lastPull=now;
+    if(push==null)push=true;
+    try{
+      const [rows,res]=await Promise.all([this.fetchAllBlocks(),sb.from('user_settings').select('settings,reflections,updated_at').maybeSingle()]);
+      if(res.error)throw res.error;
+      let ch=this.mergeRemoteRows(rows);
+      ch=this.mergeRemoteSettings(res.data)||ch;
+      if(push){
+        const remoteRefl=(res.data&&res.data.reflections)||{};
+        const remoteSettingsU=res.data&&res.data.settings?(res.data.settings.u||0):0;
+        this.pushLocalDelta(rows,remoteRefl,remoteSettingsU);
+      }
+      if(ch){persistLocal();softRender()}
+      this.ok();
+    }catch(e){this.fail(e);throw e}
+  },
+  tryPull(){this.pull(false).catch(()=>{})},
+  clearLocalForSignOut(){
+    S.sessions=[];S.settings=Object.assign({},defaults);S.refl={};S.del={};
+    ls.set('fm.sessions',[]);ls.set('fm.settings2',S.settings);ls.set('fm.refl',{});ls.set('fm.del',{});
+    localStorage.removeItem('fm.owner');
+    this.signedOut();renderAll();
+  },
+  async handleOwnership(userId){
+    const owner=ls.get('fm.owner','')||'';
+    const switched=!!(owner&&owner!==userId);
+    if(switched){
+      S.sessions=[];S.settings=Object.assign({},defaults);S.refl={};S.del={};
+      persistLocal();ls.set('fm.refl',{});ls.set('fm.del',{});
+    }
+    await this.pull(true,!switched);
+    ls.set('fm.owner',userId);
+  },
+  async onAuthUser(u){
+    if(!u){if(this.hadUser)this.clearLocalForSignOut();this.hadUser=false;this.signedOut();return}
+    this.hadUser=true;
+    try{await this.handleOwnership(u.id);maybeOnboard();renderAll()}catch(e){this.fail(e)}
   },
   saveMonth(key){
-    if(!this.db)return;const ref=this.db.doc('data/users/'+this.uid+'/'+key);
+    const sb=this.sb();if(!sb||!authUser)return;
     this.chain=this.chain.then(async()=>{
-      const snap=await ref.get(),r=snap.exists?(snap.data()||{}):{};
-      let ch=mergeDel(r.deleted,key);ch=mergeSessions(r.sessions)||ch;
-      const del=Object.keys(S.del).filter(id=>S.del[id].k===key).map(id=>({id,u:S.del[id].u}));
-      await ref.set({sessions:S.sessions.filter(x=>this.monthKey(x.start)===key),deleted:del});
-      if(ch){persistLocal();softRender()}
+      for(const s of S.sessions){
+        if(this.monthKey(s.start)!==key)continue;
+        const row=this.sessionToRow(s);if(!row)continue;
+        const {error}=await sb.from('blocks').upsert(row,{onConflict:'id'});if(error)throw error;
+      }
+      for(const id of Object.keys(S.del)){
+        const d=S.del[id];if(d.k!==key)continue;
+        const live=S.sessions.find(x=>x.id===id);
+        const stub=live||{id,start:d.start||0,end:d.start||0,planned:1,actual:1,ext:0,early:false,tag:null,note:'',rating:null,brkPlanned:null,brkActual:null,brkOver:null};
+        const row=this.sessionToRow(stub,{deleted:true,u:d.u});if(!row)continue;
+        const {error}=await sb.from('blocks').upsert(row,{onConflict:'id'});if(error)throw error;
+      }
     }).then(()=>this.ok()).catch(e=>this.fail(e));
   },
-  saveSettings(){this.write('prefs',JSON.parse(JSON.stringify(S.settings)))},
-  saveRefl(){this.write('reflections',{items:S.refl})},
-  absorb(d){const v=d.data()||{};let ch=false;
-    if(d.id==='prefs'){if((v.u||0)>(S.settings.u||0)){S.settings=Object.assign({},defaults,v);ch=true}}
-    else if(d.id==='reflections'){const it=v.items||{};Object.keys(it).forEach(k=>{if(it[k]&&(!S.refl[k]||(it[k].u||0)>(S.refl[k].u||0))){S.refl[k]=it[k];ch=true}});if(ch)ls.set('fm.refl',S.refl)}
-    else if(d.id.indexOf('m-')===0){ch=mergeDel(v.deleted,d.id);ch=mergeSessions(v.sessions)||ch}
-    return ch},
-  async init(){
-    try{
-      if(!window.claude||typeof window.claude.use!=='function')return;
-      const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
-      if(!db||!user)return;const id=await user.id();if(!id)return;
-      this.db=db;this.uid=id;
-      const snap=await db.collection('data/users/'+id).get();
-      const remoteIds=new Map(),remoteDel={};let hasPrefs=false,remoteRefl={};
-      snap.docs.forEach(d=>{const v=d.data()||{};
-        if(d.id==='prefs')hasPrefs=true;if(d.id==='reflections')remoteRefl=v.items||{};
-        if(d.id.indexOf('m-')===0){(v.sessions||[]).forEach(x=>x&&remoteIds.set(x.id,x.u||0));(v.deleted||[]).forEach(t=>t&&(remoteDel[t.id]=t.u||0))}
-        this.absorb(d)});
-      const dirty=new Set();
-      S.sessions.forEach(x=>{if(!remoteIds.has(x.id)||(x.u||0)>remoteIds.get(x.id))dirty.add(this.monthKey(x.start))});
-      Object.keys(S.del).forEach(i=>{if(!(i in remoteDel)||S.del[i].u>remoteDel[i])dirty.add(S.del[i].k)});
-      if(!hasPrefs||(S.settings.u||0)>0&&!snap.docs.some(d=>d.id==='prefs'&&(d.data().u||0)>=(S.settings.u||0)))this.saveSettings();
-      if(Object.keys(S.refl).some(k=>!remoteRefl[k]||(S.refl[k].u||0)>(remoteRefl[k].u||0)))this.saveRefl();
-      dirty.forEach(k=>this.saveMonth(k));
-      persistLocal();this.ok();renderAll();maybeOnboard();
-      this.unsub=db.collection('data/users/'+id).onSnapshot(q=>{let ch=false;q.docChanges().forEach(c=>{if(c.type!=='removed'&&this.absorb(c.doc))ch=true});if(ch){persistLocal();softRender()}},()=>{});
-    }catch(e){setSync('Saved in this browser.')}
+  saveSettings(){
+    const sb=this.sb();if(!sb||!authUser)return;
+    this.chain=this.chain.then(async()=>{
+      const {data,error:err}=await sb.from('user_settings').select('settings,reflections,updated_at').maybeSingle();
+      if(err)throw err;
+      if(data&&data.settings&&(data.settings.u||0)>(S.settings.u||0)){S.settings=Object.assign({},defaults,data.settings);persistLocal();return}
+      const body={settings:JSON.parse(JSON.stringify(S.settings)),reflections:(data&&data.reflections)||S.refl,updated_at:S.settings.u||Date.now()};
+      const {error}=await sb.from('user_settings').upsert(body,{onConflict:'user_id'});if(error)throw error;
+    }).then(()=>this.ok()).catch(e=>this.fail(e));
+  },
+  saveRefl(){
+    const sb=this.sb();if(!sb||!authUser)return;
+    this.chain=this.chain.then(async()=>{
+      const {data,error:err}=await sb.from('user_settings').select('settings,reflections,updated_at').maybeSingle();
+      if(err)throw err;
+      const merged=Object.assign({},(data&&data.reflections)||{});
+      Object.keys(S.refl).forEach(k=>{if(!merged[k]||(S.refl[k].u||0)>(merged[k].u||0))merged[k]=S.refl[k]});
+      let u=Date.now();Object.keys(merged).forEach(k=>{if(merged[k]&&merged[k].u>u)u=merged[k].u});
+      const body={settings:(data&&data.settings)||S.settings,reflections:merged,updated_at:u};
+      const {error}=await sb.from('user_settings').upsert(body,{onConflict:'user_id'});if(error)throw error;
+    }).then(()=>this.ok()).catch(e=>this.fail(e));
+  },
+  init(){
+    if(this.pullListeners)return;this.pullListeners=true;
+    window.addEventListener('focus',()=>this.tryPull());
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)this.tryPull()});
+    if(!authClient)this.signedOut();
   }
 };
 function persistLocal(){ls.set('fm.sessions',S.sessions);ls.set('fm.settings2',S.settings)}
@@ -1117,7 +1215,7 @@ function renderTable(D,demoOn){
   $('#sessTbl').innerHTML=h+'</tbody>';
 }
 
-/* account (Supabase auth only; data stays local) */
+/* account (Supabase auth + sync) */
 const SUPABASE_URL='https://tdgufuwotovstrkbllwm.supabase.co';
 const SUPABASE_KEY='sb_publishable_9DKBpd2B0d31DFNTAP1rUw_NuKuOhn5';
 let authClient=null,authUser=null,authBusy=false;
@@ -1144,7 +1242,7 @@ async function authAction(mode){
 function initAuth(){
   if(typeof supabase==='undefined'||!supabase.createClient){$('#authSec').hidden=true;return}
   authClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  const setUser=u=>{authUser=u;renderAuthUI()};
+  const setUser=u=>{authUser=u;renderAuthUI();store.onAuthUser(u)};
   authClient.auth.getSession().then(({data:{session}})=>setUser(session&&session.user||null));
   authClient.auth.onAuthStateChange((_e,session)=>setUser(session&&session.user||null));
   $('#authSignIn').addEventListener('click',()=>authAction('in'));
@@ -1221,7 +1319,7 @@ function saveEditor(){
 }
 function deleteFromEditor(){
   const s=findS(ED.id);if(!s)return;const k=store.monthKey(s.start);
-  S.del[s.id]={k,u:Date.now()};ls.set('fm.del',S.del);
+  S.del[s.id]={k,u:Date.now(),start:s.start};ls.set('fm.del',S.del);
   S.sessions=S.sessions.filter(x=>x.id!==s.id);persistLocal();store.saveMonth(k);closeEditor();renderAll();
   toast('Block deleted','Undo',()=>{delete S.del[s.id];ls.set('fm.del',S.del);upsert(s);S.sessions.sort((a,b)=>a.start-b.start);persistLocal();renderAll();toast('Block restored')});
 }
@@ -1410,7 +1508,7 @@ document.addEventListener('keydown',e=>{
 /* boot */
 if(S.run&&S.run.phase==='focus'&&!S.run.pausedAt&&Date.now()>=S.run.endsAt)endWork(false,true);
 if(S.run&&S.run.phase==='break'&&Date.now()>=S.run.endsAt){S.run.phase='breakEnd';saveRun()}
-initAuth();renderAll();store.init().then(()=>checkMilestone(true));setTimeout(()=>{if(!store.db)maybeOnboard()},1500);
+initAuth();renderAll();store.init();checkMilestone(true);setTimeout(()=>{if(!authUser)maybeOnboard()},1500);
 })();
 </script>
 
