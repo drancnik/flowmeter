@@ -45,7 +45,7 @@ export default function Home() {
       <p>Flowmeter</p>
       <h1>{format(secondsLeft)}</h1>
       <button onClick={startPause}>{running ? "Pause" : "Start"}</button>
-      <button onClick={() => setLength(50)}>50 minutes</button>
+      <button onClick={() => setLength("50")}>50 minutes</button>
       <button onClick={addMinute}>+1 minute</button>
       <button onClick={() => setLength(25)}>Reset</button>
     </main>
