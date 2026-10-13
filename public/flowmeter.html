@@ -708,9 +708,9 @@ const store={
     const remoteIds=new Map(),remoteDel={};
     (rows||[]).forEach(r=>{if(r.deleted)remoteDel[r.id]=r.updated_at||0;else remoteIds.set(r.id,r.updated_at||0)});
     const dirty=new Set();
-    S.sessions.forEach(x=>{if(x.actual<=0)return;if(!remoteIds.has(x.id)||(x.u||0)>remoteIds.get(x.id))dirty.add(this.monthKey(x.start))});
-    Object.keys(S.del).forEach(i=>{if(!(i in remoteDel)||S.del[i].u>remoteDel[i])dirty.add(S.del[i].k)});
-    dirty.forEach(k=>this.saveMonth(k));
+    S.sessions.forEach(x=>{if(x.actual<=0)return;if(!remoteIds.has(x.id)||(x.u||0)>remoteIds.get(x.id))dirty.add(x.id)});
+    Object.keys(S.del).forEach(i=>{if(!(i in remoteDel)||S.del[i].u>remoteDel[i])dirty.add(i)});
+    this.saveBlocks(Array.from(dirty));
     if(!remoteSettingsU||(S.settings.u||0)>remoteSettingsU)this.saveSettings();
     if(Object.keys(S.refl).some(k=>!remoteRefl[k]||(S.refl[k].u||0)>(remoteRefl[k].u||0)))this.saveRefl();
   },
@@ -756,20 +756,21 @@ const store={
     this.hadUser=true;
     try{await this.handleOwnership(u.id);maybeOnboard();renderAll()}catch(e){this.fail(e)}
   },
-  saveMonth(key){
-    const sb=this.sb();if(!sb||!authUser)return;
+  saveBlocks(ids){
+    const sb=this.sb();if(!sb||!authUser||!ids||!ids.length)return;
     this.chain=this.chain.then(async()=>{
-      for(const s of S.sessions){
-        if(this.monthKey(s.start)!==key)continue;
-        const row=this.sessionToRow(s);if(!row)continue;
-        const {error}=await sb.from('blocks').upsert(row,{onConflict:'id'});if(error)throw error;
+      const rows=[];
+      for(const id of new Set(ids)){
+        const d=S.del[id],live=S.sessions.find(x=>x.id===id);
+        let row=null;
+        if(d){
+          const stub=live||{id,start:d.start||0,end:d.start||0,planned:1,actual:1,ext:0,early:false,tag:null,note:'',rating:null,brkPlanned:null,brkActual:null,brkOver:null};
+          row=this.sessionToRow(stub,{deleted:true,u:d.u});
+        }else if(live)row=this.sessionToRow(live);
+        if(row)rows.push(row);
       }
-      for(const id of Object.keys(S.del)){
-        const d=S.del[id];if(d.k!==key)continue;
-        const live=S.sessions.find(x=>x.id===id);
-        const stub=live||{id,start:d.start||0,end:d.start||0,planned:1,actual:1,ext:0,early:false,tag:null,note:'',rating:null,brkPlanned:null,brkActual:null,brkOver:null};
-        const row=this.sessionToRow(stub,{deleted:true,u:d.u});if(!row)continue;
-        const {error}=await sb.from('blocks').upsert(row,{onConflict:'id'});if(error)throw error;
+      for(let i=0;i<rows.length;i+=500){
+        const {error}=await sb.from('blocks').upsert(rows.slice(i,i+500),{onConflict:'id'});if(error)throw error;
       }
     }).then(()=>this.ok()).catch(e=>this.fail(e));
   },
@@ -805,7 +806,7 @@ const store={
 function persistLocal(){ls.set('fm.sessions',S.sessions);ls.set('fm.settings2',S.settings)}
 function saveSettings(){S.settings.u=Date.now();persistLocal();store.saveSettings()}
 function saveRun(){ls.set('fm.run2',S.run)}
-function upsert(s){s.u=Date.now();const i=S.sessions.findIndex(x=>x.id===s.id);if(i>=0)S.sessions[i]=s;else S.sessions.push(s);persistLocal();store.saveMonth(store.monthKey(s.start))}
+function upsert(s){s.u=Date.now();const i=S.sessions.findIndex(x=>x.id===s.id);if(i>=0)S.sessions[i]=s;else S.sessions.push(s);persistLocal();store.saveBlocks([s.id])}
 const findS=id=>S.sessions.find(x=>x.id===id);
 const tagOf=id=>S.settings.tags.find(t=>t.id===id)||null;
 const tagColor=id=>{const t=tagOf(id);return t?t.color:'var(--line)'};
@@ -1309,18 +1310,17 @@ function saveEditor(){
   if(!(mn>=1&&mn<=600))return fail('Minutes must be between 1 and 600.');
   const q=dv.split('-').map(Number),t=tv.split(':').map(Number),start=new Date(q[0],q[1]-1,q[2],t[0],t[1]).getTime();
   if(start>Date.now())return fail('That start time is in the future.');
-  const old=ED.id?findS(ED.id):null,oldKey=old?store.monthKey(old.start):null;
+  const old=ED.id?findS(ED.id):null;
   const s=old||{id:uid(),manual:true,mode:'manual',ext:0,early:false,label:'',distractions:[],brkPlanned:null,brkActual:null,brkOver:null};
   if(!old||s.manual||Math.round(s.actual)!==Math.round(mn))s.planned=old&&!s.manual?s.planned:mn;
   s.start=start;s.end=start+mn*60000;s.actual=mn;s.tag=ED.tag||null;s.note=$('#edNote').value.trim();s.rating=ED.rating||null;
   upsert(s);S.sessions.sort((a,b)=>a.start-b.start);persistLocal();
-  if(oldKey&&oldKey!==store.monthKey(s.start))store.saveMonth(oldKey);
   closeEditor();renderAll();const ms=checkMilestone();if(ms){petalRain();toast('Milestone: '+ms[0]+' hours planted. '+ms[1]+' unlocked.')}else toast(old?'Block updated':fmtDur(mn)+' added to your garden');
 }
 function deleteFromEditor(){
   const s=findS(ED.id);if(!s)return;const k=store.monthKey(s.start);
   S.del[s.id]={k,u:Date.now(),start:s.start};ls.set('fm.del',S.del);
-  S.sessions=S.sessions.filter(x=>x.id!==s.id);persistLocal();store.saveMonth(k);closeEditor();renderAll();
+  S.sessions=S.sessions.filter(x=>x.id!==s.id);persistLocal();store.saveBlocks([s.id]);closeEditor();renderAll();
   toast('Block deleted','Undo',()=>{delete S.del[s.id];ls.set('fm.del',S.del);upsert(s);S.sessions.sort((a,b)=>a.start-b.start);persistLocal();renderAll();toast('Block restored')});
 }
 
@@ -1390,11 +1390,11 @@ function restoreBackup(file){
     if(!o||o.app!=='flowmeter'||!Array.isArray(o.sessions)){toast('That file is not a Flowmeter backup');return}
     const map=new Map(S.sessions.map(x=>[x.id,x])),touched=new Set();let added=0;
     o.sessions.filter(x=>x&&typeof x.id==='string'&&typeof x.start==='number'&&typeof x.actual==='number'&&x.actual>0).forEach(x=>{
-      if(isDead(x))return;const cur=map.get(x.id);if(!cur||(x.u||0)>(cur.u||0)){map.set(x.id,Object.assign({rating:null,tag:null,note:'',label:''},x));touched.add(store.monthKey(x.start));if(!cur)added++}});
+      if(isDead(x))return;const cur=map.get(x.id);if(!cur||(x.u||0)>(cur.u||0)){map.set(x.id,Object.assign({rating:null,tag:null,note:'',label:''},x));touched.add(x.id);if(!cur)added++}});
     S.sessions=Array.from(map.values()).sort((a,b)=>a.start-b.start);
     if(o.settings&&Array.isArray(o.settings.tags))o.settings.tags.forEach(t=>{if(t&&t.id&&t.name&&!tagOf(t.id))S.settings.tags.push({id:t.id,name:String(t.name).slice(0,24),color:TAG_COLORS.indexOf(t.color)>=0?t.color:TAG_COLORS[0]})});
     if(o.reflections&&typeof o.reflections==='object')Object.keys(o.reflections).forEach(k=>{const v=o.reflections[k];if(v&&typeof v.t==='string'&&(!S.refl[k]||(v.u||0)>(S.refl[k].u||0)))S.refl[k]=v});
-    persistLocal();ls.set('fm.refl',S.refl);touched.forEach(k=>store.saveMonth(k));saveSettings();store.saveRefl();
+    persistLocal();ls.set('fm.refl',S.refl);store.saveBlocks(Array.from(touched));saveSettings();store.saveRefl();
     if(S.settings.msSeen>=0)S.settings.msSeen=msReached();
     renderAll();renderSettings();toast('Restored. '+added+' new block'+(added===1?'':'s')+' added.');
   };rd.readAsText(file);
