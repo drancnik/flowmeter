@@ -3,57 +3,68 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#386641">
+<meta name="theme-color" content="#F3EEE3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161514" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Flowmeter">
-<meta name="description" content="A calm focus timer that grows a garden from your work.">
+<meta name="description" content="A calm focus timer that turns your work into ink paintings.">
 <title>Flowmeter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Young+Serif&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Cormorant+Garamond:wght@500;600&display=swap">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="brushEdge" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="inkSpread" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="14" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".6"/></filter>
+    <filter id="washBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.4"/></filter>
+  </defs>
+</svg>
 <style>
-/* Layout: a garden card with the growing plant on the left, soft controls on the right, today's garden bed below. Garden and Review are sibling tabs; settings live in a sheet. */
+/* Layout: an ink scene on the left (the ensō is the timer, ink spreads as you work), controls on the right, today's sheet of brushstrokes below. Gallery and Review are sibling tabs; settings live in a sheet. */
 :root{
-  --hunter:#386641; --sage:#6A994E; --lime:#A7C957; --cream:#F2E8CF; --brick:#BC4749;
-  --bg:#F2E8CF; --surface:#FBF6E9; --sunk:#E9DDBD; --line:#DDCFAA;
-  --fg:#23382A; --muted:#62705B;
-  --work:#386641; --work-soft:#DFE8C9;
-  --rest:#6A994E; --rest-soft:#E4EDCB;
-  --bloom:#BC4749; --bloom-soft:#F3D9CF;
-  --pot:#BC4749; --soil:#7A5A43;
-  --l0:#E9DDBD; --l1:#D5E3A8; --l2:#A7C957; --l3:#6A994E; --l4:#386641;
-  --shadow:0 1px 2px rgba(56,102,65,.06),0 8px 24px rgba(56,102,65,.08);
-  --ui:'Nunito',ui-rounded,system-ui,-apple-system,'Segoe UI',sans-serif;
-  --display:'Young Serif',Georgia,'Times New Roman',serif;
+  --paper:#F3EEE3; --ink:#23201D; --indigo:#2F3E5C; --vermilion:#B33A2A; --ochre:#B8863B; --moss:#5E6B4E;
+  --bg:#F3EEE3; --surface:#FAF7F0; --sunk:#E7E0D2; --line:#D8CFBE;
+  --fg:#1E1C1A; --muted:#6E675E;
+  --work:#23201D; --work-soft:#E4DED2;
+  --rest:#2F3E5C; --rest-soft:#E1E4EA;
+  --bloom:#B33A2A; --bloom-soft:#F2DCD5;
+  --good:#5E6B4E;
+  --l0:#E7E0D2; --l1:#CFC6B6; --l2:#A39A8B; --l3:#6B645A; --l4:#23201D;
+  --shadow:0 1px 2px rgba(35,32,29,.05),0 10px 28px rgba(35,32,29,.07);
+  --ui:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --display:'Cormorant Garamond','Iowan Old Style',Georgia,'Times New Roman',serif;
   --ph:var(--work); --ph-soft:var(--work-soft);
-  --r:18px;
+  --r:16px;
+  --grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .14 0 0 0 0 .12 0 0 0 0 .1 0 0 0 .07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#15231A; --surface:#1C2E22; --sunk:#233829; --line:#2F4834;
-  --fg:#F2E8CF; --muted:#B4B898;
-  --work:#A7C957; --work-soft:#2A4230;
-  --rest:#8DBB6A; --rest-soft:#26402C;
-  --bloom:#D9686A; --bloom-soft:#4A2A28;
-  --pot:#B4504B; --soil:#5C4636;
-  --l0:#233829; --l1:#2E5234; --l2:#4C7C43; --l3:#6A994E; --l4:#A7C957;
-  --shadow:0 1px 2px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.25);
+  --paper:#161514; --ink:#ECE5D7; --indigo:#9DB0CF; --vermilion:#E0654F; --ochre:#D9A85A; --moss:#A3B08C;
+  --bg:#161514; --surface:#1F1D1B; --sunk:#2A2724; --line:#37332F;
+  --fg:#EDE6D8; --muted:#A59C8E;
+  --work:#EDE6D8; --work-soft:#2E2B27;
+  --rest:#9DB0CF; --rest-soft:#262B33;
+  --bloom:#E0654F; --bloom-soft:#3D2420;
+  --good:#A3B08C;
+  --l0:#2A2724; --l1:#4A453F; --l2:#7A7266; --l3:#B3AA9B; --l4:#EDE6D8;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.3);
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#15231A; --surface:#1C2E22; --sunk:#233829; --line:#2F4834;
-  --fg:#F2E8CF; --muted:#B4B898;
-  --work:#A7C957; --work-soft:#2A4230;
-  --rest:#8DBB6A; --rest-soft:#26402C;
-  --bloom:#D9686A; --bloom-soft:#4A2A28;
-  --pot:#B4504B; --soil:#5C4636;
-  --l0:#233829; --l1:#2E5234; --l2:#4C7C43; --l3:#6A994E; --l4:#A7C957;
-  --shadow:0 1px 2px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.25);
+  --paper:#161514; --ink:#ECE5D7; --indigo:#9DB0CF; --vermilion:#E0654F; --ochre:#D9A85A; --moss:#A3B08C;
+  --bg:#161514; --surface:#1F1D1B; --sunk:#2A2724; --line:#37332F;
+  --fg:#EDE6D8; --muted:#A59C8E;
+  --work:#EDE6D8; --work-soft:#2E2B27;
+  --rest:#9DB0CF; --rest-soft:#262B33;
+  --bloom:#E0654F; --bloom-soft:#3D2420;
+  --good:#A3B08C;
+  --l0:#2A2724; --l1:#4A453F; --l2:#7A7266; --l3:#B3AA9B; --l4:#EDE6D8;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.3);
   color-scheme:dark}
 html,body{height:100%}
-body{background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{background:var(--bg) var(--grain);color:var(--fg);font-family:var(--ui);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 button,input,textarea{font:inherit;color:inherit}
@@ -62,8 +73,8 @@ button,input,textarea{font:inherit;color:inherit}
 .app[data-phase="break"],.app[data-phase="breakEnd"]{--ph:var(--rest);--ph-soft:var(--rest-soft)}
 
 .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:20px;margin-right:auto;color:var(--fg)}
-.brand svg{width:26px;height:26px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:.01em;margin-right:auto;color:var(--fg)}
+.brand svg{width:28px;height:28px}
 .tabs{display:flex;gap:2px;background:var(--sunk);padding:4px;border-radius:999px}
 .tabs button{border:0;background:none;padding:7px 16px;border-radius:999px;cursor:pointer;color:var(--muted);font-size:14.5px;font-weight:700}
 .tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
@@ -76,39 +87,32 @@ button,input,textarea{font:inherit;color:inherit}
 /* timer */
 .focus-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:stretch}
 @media (max-width:840px){.focus-grid{grid-template-columns:minmax(0,1fr);gap:20px}}
-.scene{background:var(--surface);border-radius:28px;box-shadow:var(--shadow);padding:26px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;overflow:hidden}
-.scene::before{content:"";position:absolute;inset:auto -20% -40% -20%;height:70%;background:radial-gradient(closest-side,var(--ph-soft),transparent);opacity:.8;pointer-events:none}
+.scene{background:var(--surface) var(--grain);border-radius:28px;box-shadow:var(--shadow);padding:26px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;overflow:hidden}
 .pot-wrap{position:relative;width:min(320px,78vw);aspect-ratio:1;max-width:100%}
-#scene{width:100%;height:100%;display:block;position:relative}
-#scene .track{fill:none;stroke:var(--sunk);stroke-width:9}
-#scene .prog{fill:none;stroke:var(--ph);stroke-width:9;stroke-linecap:round;transition:stroke .8s}
-#scene .disc{fill:var(--bg)}
-#scene .stem{fill:none;stroke:var(--sage);stroke-width:5;stroke-linecap:round}
-#scene .leaf{fill:var(--sage)}
-#scene .leaf.alt{fill:var(--lime)}
-#scene .pot{fill:var(--pot)}
-#scene .potrim{fill:var(--pot);filter:brightness(1.12)}
-#scene .soil{fill:var(--soil)}
-#scene .petal{fill:var(--bloom)}
-#scene .core{fill:var(--lime)}
-.plant{transform-origin:120px 172px}
-.app[data-phase="focus"] .plant.live{animation:sway 7s ease-in-out infinite}
-@keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
-.flower{transform-box:fill-box;transform-origin:center}
-.app[data-phase="break"] .flower{animation:breeze 5s ease-in-out infinite}
-@keyframes breeze{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+#scene{width:100%;height:100%;display:block;position:relative;overflow:visible}
+#scene .track{fill:none;stroke:var(--line);stroke-width:1.2;stroke-dasharray:1.5 6;stroke-linecap:round}
+#scene .prog{fill:none;stroke:var(--ph);stroke-width:11;stroke-linecap:round;transition:stroke .8s}
+#scene .prog-wash{fill:none;stroke:var(--ph);stroke-width:22;stroke-linecap:round;opacity:.09;transition:stroke .8s}
+#scene .blot{fill:var(--ink)}
+#scene .blot.w{fill:var(--ph);transition:fill .8s}
+#inkdrop{transition:opacity 6s ease}
+.app[data-phase="break"] #inkdrop,.app[data-phase="breakEnd"] #inkdrop{opacity:.42}
+.app[data-phase="focus"] #inkdrop.live{animation:seep 9s ease-in-out infinite}
+@keyframes seep{0%,100%{opacity:1}50%{opacity:.86}}
+#seal rect{fill:var(--vermilion)}
+#seal path{stroke:var(--surface);fill:none;stroke-width:2.2;stroke-linecap:round}
 .digits{font-weight:300;font-size:clamp(46px,9vw,68px);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.01em;position:relative}
 .dial-label{font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ph);position:relative}
 .dial-sub{font-size:14px;color:var(--muted);position:relative;text-align:center}
 .petals{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.petals i{position:absolute;top:-20px;width:12px;height:16px;border-radius:50% 50% 50% 0;background:var(--bloom);opacity:.85;animation:fall 2.8s ease-in forwards}
-.petals i:nth-child(3n){background:var(--lime)}
-.petals i:nth-child(4n){background:var(--sage)}
-@keyframes fall{to{transform:translateY(560px) rotate(540deg);opacity:0}}
+.petals i{position:absolute;border-radius:50%;background:var(--ink);opacity:0;transform:scale(0);animation:splash 2.6s cubic-bezier(.2,.8,.3,1) forwards}
+.petals i:nth-child(4n){background:var(--vermilion)}
+.petals i:nth-child(5n){background:var(--ochre)}
+@keyframes splash{0%{transform:scale(0);opacity:.0}12%{opacity:.85}60%{opacity:.5}100%{transform:scale(1);opacity:0}}
 
 .side{display:flex;flex-direction:column;justify-content:center;min-width:0}
 .panel{display:flex;flex-direction:column;gap:18px;min-width:0}
-.panel h2{font-family:var(--display);font-weight:400;font-size:28px;line-height:1.2;margin:0;text-wrap:balance}
+.panel h2{font-family:var(--display);font-weight:600;font-size:32px;line-height:1.2;margin:0;text-wrap:balance}
 .lead{margin:-8px 0 0;color:var(--muted)}
 .field{display:flex;flex-direction:column;gap:8px}
 .lbl{font-size:13.5px;font-weight:700}
@@ -142,7 +146,7 @@ input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,input[
 kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid currentColor;border-radius:6px;padding:0 6px;opacity:.65}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row>.btn{flex:1 1 auto}
-.label-now{font-family:var(--display);font-size:26px;line-height:1.25;overflow-wrap:anywhere;display:flex;align-items:center;gap:10px}
+.label-now{font-family:var(--display);font-weight:600;font-size:29px;line-height:1.25;overflow-wrap:anywhere;display:flex;align-items:center;gap:10px}
 .label-now .dot{width:12px;height:12px;border-radius:50%}
 .rates{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .rates button{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:9px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0;transition:transform .15s}
@@ -152,42 +156,40 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .rates button[aria-pressed="true"]{border-color:var(--ph);background:var(--ph-soft)}
 .rates button[data-rate="5"][aria-pressed="true"]{border-color:var(--bloom);background:var(--bloom-soft)}
 .breath{display:flex;align-items:center;gap:16px}
-.breath .orb{width:52px;height:52px;border-radius:50%;background:var(--rest-soft);border:2px solid var(--rest);flex:none;animation:breathe 8s ease-in-out infinite}
+.breath .orb{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle,var(--rest-soft) 55%,transparent 72%);border:3px solid var(--rest);border-right-color:transparent;flex:none;animation:breathe 8s ease-in-out infinite}
 @keyframes breathe{0%,100%{transform:scale(.62)}50%{transform:scale(1)}}
-.breath p{margin:0;font-family:var(--display);font-size:19px}
+.breath p{margin:0;font-family:var(--display);font-weight:600;font-size:22px}
 
-.bed{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.bed{background:var(--surface) var(--grain);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:12px}
 .bed-head{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:baseline}
-.bed-head h3{font-family:var(--display);font-weight:400;font-size:18px;margin:0 auto 0 0}
+.bed-head h3{font-family:var(--display);font-weight:600;font-size:21px;margin:0 auto 0 0}
 .bed-head span{font-size:14px;color:var(--muted)}
 .bed-head b{color:var(--fg);font-weight:800;font-variant-numeric:tabular-nums}
 .goalbar{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted)}
 .goalbar .track{flex:1;height:10px;border-radius:999px;background:var(--sunk);overflow:hidden}
-.goalbar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--sage),var(--lime));transition:width .8s cubic-bezier(.3,1,.4,1)}
-.goalbar.done .fill{background:linear-gradient(90deg,var(--sage),var(--bloom))}
+.goalbar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--l2),var(--work));transition:width .8s cubic-bezier(.3,1,.4,1)}
+.goalbar.done .fill{background:linear-gradient(90deg,var(--work),var(--bloom))}
 .goalbar b{color:var(--fg);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .garden{width:100%;overflow-x:auto}
 .garden svg{display:block;height:84px}
 .garden .ground{fill:var(--sunk)}
-.stem{stroke:var(--sage);stroke-linecap:round;fill:none}
-.leaf{fill:var(--sage)}
-.leaf.alt{fill:var(--lime)}
-.petal{fill:var(--bloom)}
-.core,.bud{fill:var(--lime)}
-.garden .stem{stroke-width:3}
-.new{animation:pop .9s cubic-bezier(.3,1.6,.5,1) both;transform-box:fill-box;transform-origin:50% 100%}
-@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.stroke{fill:var(--ink)}
+.stroke.wash{filter:url(#washBlur)}
+.seal{fill:var(--vermilion)}
+.dryspot{fill:var(--ink);opacity:.18}
+.new{animation:brushin .9s cubic-bezier(.3,1,.4,1) both;transform-box:fill-box;transform-origin:50% 0}
+@keyframes brushin{from{transform:scaleY(0);opacity:0}to{transform:scaleY(1);opacity:1}}
 
 /* cards, review, garden */
 .stack{display:flex;flex-direction:column;gap:16px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
-.tile{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile{background:var(--surface) var(--grain);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .tile .v{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
 .tile .k{font-size:13px;color:var(--muted)}
 .tile .mini{height:6px;border-radius:999px;background:var(--sunk);overflow:hidden;margin-top:8px}
-.tile .mini span{display:block;height:100%;background:var(--sage);border-radius:999px}
-.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.card h3{margin:0;font-family:var(--display);font-weight:400;font-size:19px}
+.tile .mini span{display:block;height:100%;background:var(--work);border-radius:999px}
+.card{background:var(--surface) var(--grain);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h3{margin:0;font-family:var(--display);font-weight:600;font-size:22px}
 .bar-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .bar-head h3{margin-right:auto}
 .nav{display:flex;gap:4px;align-items:center}
@@ -233,6 +235,7 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .muted{font-size:14px;color:var(--muted);margin:0;max-width:70ch}
 .gsum{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:14px;color:var(--muted)}
 .gsum b{color:var(--fg);font-weight:800;font-variant-numeric:tabular-nums}
+.gsum b.up{color:var(--good)}.gsum b.down{color:var(--bloom)}
 .gview{width:100%;overflow-x:auto}
 .gview svg{display:block}
 .gview .soil,.gview .ground{fill:var(--sunk)}
@@ -245,11 +248,12 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .gview .hit:hover{fill:var(--work-soft);opacity:.45}
 .gview .goal{stroke:var(--bloom);stroke-width:1.5;stroke-dasharray:5 5}
 .gview .lv0{fill:var(--l0)}.gview .lv1{fill:var(--l1)}.gview .lv2{fill:var(--l2)}.gview .lv3{fill:var(--l3)}.gview .lv4{fill:var(--l4)}
-.gview .flowring{fill:none;stroke:var(--bloom);stroke-width:2}
-.gview .grow{animation:pop .7s cubic-bezier(.3,1.5,.5,1) both;transform-box:fill-box;transform-origin:50% 100%}
+.gview .flowring{fill:none;stroke:var(--vermilion);stroke-width:2}
+.gview .grow{animation:fadein .9s ease both}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:13px;color:var(--muted)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
-.legend .fl{border-radius:50%;border:2px solid var(--bloom);background:transparent}
+.legend .fl{border-radius:2px;background:var(--vermilion)}
 .keys{margin-top:auto;font-size:12.5px;color:var(--muted)}
 
 /* focus view, milestones */
@@ -261,7 +265,7 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .zen-ctrl{display:none;gap:10px;margin-top:16px;position:relative;flex-wrap:wrap;justify-content:center}
 .app.zen .zen-ctrl{display:flex}
 .ms{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
-.ms .m{background:var(--bg);border-radius:16px;padding:10px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
+.ms .m{background:var(--bg) var(--grain);border-radius:16px;padding:10px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
 .ms .m svg{width:56px;height:64px}
 .ms .m b{font-size:14px;font-weight:800}
 .ms .m span{font-size:11.5px;color:var(--muted);line-height:1.3}
@@ -272,10 +276,10 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
 
 /* sheets */
-.modal{position:fixed;inset:0;background:rgba(21,35,26,.38);display:grid;place-items:center;padding:16px;z-index:20;animation:fade .2s ease}
+.modal{position:fixed;inset:0;background:rgba(20,18,16,.4);display:grid;place-items:center;padding:16px;z-index:20;animation:fade .2s ease}
 @keyframes fade{from{opacity:0}}
 .sheet{background:var(--surface);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(560px,100%);max-height:calc(100% - 32px);overflow:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
-.sheet h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0;text-wrap:balance}
+.sheet h2{font-family:var(--display);font-weight:600;font-size:30px;margin:0;text-wrap:balance}
 .sheet-head{display:flex;align-items:center;gap:10px}
 .sheet-head h2{margin-right:auto}
 .sec{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px}
@@ -291,7 +295,7 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast{display:flex;align-items:center;gap:14px}
 .toast.act{pointer-events:auto}
-.toast button{border:0;background:var(--lime);color:#23382A;font-weight:800;border-radius:999px;padding:3px 12px;cursor:pointer;font-size:13.5px}
+.toast button{border:0;background:var(--vermilion);color:#fff;font-weight:800;border-radius:999px;padding:3px 12px;cursor:pointer;font-size:13.5px}
 input[type=date],input[type=time],.ed-num{width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px;font-size:15.5px;outline:none;font-weight:600}
 input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:0 0 0 4px var(--ph-soft)}
 .ed-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -303,7 +307,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 .wk-stats div{background:var(--bg);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .wk-stats b{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
 .wk-stats span{font-size:13px;color:var(--muted)}
-.wk-stats .up{color:var(--sage);font-weight:800}
+.wk-stats .up{color:var(--good);font-weight:800}
 .wk-stats .down{color:var(--bloom);font-weight:800}
 .notes{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none;max-height:280px;overflow:auto}
 .notes li{display:flex;gap:10px;font-size:14px;align-items:baseline}
@@ -316,10 +320,10 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 
 <div class="app" id="app" data-phase="idle">
   <header class="top">
-    <div class="brand"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--ph-soft)"/><path d="M13 20 C13 15 13 12 13 8" stroke="var(--sage)" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M13 13 C15 10 18 10 19 11 C17 13 15 14 13 13Z" fill="var(--sage)"/><path d="M13 16 C11 13 8 13 7 14 C9 16 11 17 13 16Z" fill="var(--lime)"/><circle cx="13" cy="7" r="2.4" fill="var(--bloom)"/></svg>Flowmeter</div>
+    <div class="brand"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9.5" fill="none" stroke="var(--ink)" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="54 60" transform="rotate(-70 14 14)" filter="url(#brushEdge)"/><rect x="19.5" y="18.5" width="6.5" height="6.5" rx="1.2" fill="var(--vermilion)"/></svg>Flowmeter</div>
     <nav class="tabs" role="tablist" aria-label="Views">
       <button role="tab" id="t-focus" data-tab="focus" aria-selected="true">Timer</button>
-      <button role="tab" id="t-garden" data-tab="garden" aria-selected="false">Garden</button>
+      <button role="tab" id="t-garden" data-tab="garden" aria-selected="false">Gallery</button>
       <button role="tab" id="t-review" data-tab="review" aria-selected="false">Review</button>
     </nav>
     <button class="icon-btn" id="setBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
@@ -332,27 +336,17 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
         <div class="petals" id="petals"></div>
         <div class="pot-wrap">
           <svg id="scene" viewBox="0 0 240 240" aria-hidden="true">
-            <circle class="track" cx="120" cy="120" r="108"/>
-            <circle class="prog" id="ring" cx="120" cy="120" r="108" transform="rotate(-90 120 120)" stroke-dasharray="678.58" stroke-dashoffset="0"/>
-            <circle class="disc" cx="120" cy="120" r="96"/>
-            <g class="plant live" id="plant">
-              <path class="stem" id="stem" d="M120 174 C117 150 124 124 120 80" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
-              <g transform="translate(119.5 160) rotate(-18)"><g class="lf" data-at="0.06"><path class="leaf" d="M0 0 C8 -11 24 -11 31 -2 C23 6 9 6 0 0Z"/></g></g>
-              <g transform="translate(120 150) scale(-1 1) rotate(-18)"><g class="lf" data-at="0.2"><path class="leaf alt" d="M0 0 C8 -11 24 -11 31 -2 C23 6 9 6 0 0Z"/></g></g>
-              <g transform="translate(121.5 136) rotate(-22)"><g class="lf" data-at="0.36"><path class="leaf" d="M0 0 C7 -10 21 -10 27 -2 C20 5 8 5 0 0Z"/></g></g>
-              <g transform="translate(121.5 121) scale(-1 1) rotate(-22)"><g class="lf" data-at="0.52"><path class="leaf alt" d="M0 0 C7 -10 21 -10 27 -2 C20 5 8 5 0 0Z"/></g></g>
-              <g transform="translate(121 107) rotate(-26)"><g class="lf" data-at="0.68"><path class="leaf" d="M0 0 C6 -9 18 -9 23 -2 C17 5 7 5 0 0Z"/></g></g>
-              <g transform="translate(120.5 94) scale(-1 1) rotate(-26)"><g class="lf" data-at="0.82"><path class="leaf alt" d="M0 0 C6 -9 18 -9 23 -2 C17 5 7 5 0 0Z"/></g></g>
-              <g transform="translate(120 79)"><g id="flowerScale" transform="scale(0)"><g class="flower">
-                <ellipse class="petal" cx="0" cy="-9" rx="6" ry="9"/><ellipse class="petal" cx="0" cy="9" rx="6" ry="9"/>
-                <ellipse class="petal" cx="-9" cy="0" rx="9" ry="6"/><ellipse class="petal" cx="9" cy="0" rx="9" ry="6"/>
-                <ellipse class="petal" cx="-6.4" cy="-6.4" rx="5" ry="8" transform="rotate(-45 -6.4 -6.4)"/><ellipse class="petal" cx="6.4" cy="6.4" rx="5" ry="8" transform="rotate(-45 6.4 6.4)"/>
-                <ellipse class="petal" cx="6.4" cy="-6.4" rx="5" ry="8" transform="rotate(45 6.4 -6.4)"/><ellipse class="petal" cx="-6.4" cy="6.4" rx="5" ry="8" transform="rotate(45 -6.4 6.4)"/>
-                <circle class="core" r="5.5"/></g></g></g>
+            <circle class="track" cx="120" cy="120" r="102"/>
+            <g id="inkdrop" class="live" filter="url(#inkSpread)">
+              <g class="ib" data-at="0" data-cx="114" data-cy="122"><circle class="blot w" cx="114" cy="122" r="50" opacity=".16"/></g>
+              <g class="ib" data-at="0.12" data-cx="116" data-cy="120"><circle class="blot" cx="116" cy="120" r="30" opacity=".82"/></g>
+              <g class="ib" data-at="0.42" data-cx="140" data-cy="102"><circle class="blot" cx="140" cy="102" r="15" opacity=".55"/></g>
+              <g class="ib" data-at="0.62" data-cx="96" data-cy="146"><circle class="blot w" cx="96" cy="146" r="20" opacity=".3"/></g>
+              <g class="ib" data-at="0.8" data-cx="132" data-cy="140"><circle class="blot" cx="132" cy="140" r="9" opacity=".9"/></g>
             </g>
-            <ellipse class="soil" cx="120" cy="174" rx="27" ry="5"/>
-            <path class="pot" d="M90 176 L150 176 L143 206 Q142 210 138 210 L102 210 Q98 210 97 206 Z"/>
-            <rect class="potrim" x="86" y="171" width="68" height="10" rx="5"/>
+            <circle class="prog-wash" id="ringWash" cx="120" cy="120" r="102" transform="rotate(-100 120 120)" stroke-dasharray="615.25 640.88" stroke-dashoffset="0" filter="url(#washBlur)"/>
+            <circle class="prog" id="ring" cx="120" cy="120" r="102" transform="rotate(-100 120 120)" stroke-dasharray="615.25 640.88" stroke-dashoffset="0" filter="url(#brushEdge)"/>
+            <g transform="translate(213 213)"><g id="seal" transform="scale(0)"><rect x="-13" y="-13" width="26" height="26" rx="3" filter="url(#brushEdge)"/><path d="M-6 -4 C-2 -8 2 0 6 -4 M-6 4 C-2 0 2 8 6 4"/></g></g>
           </svg>
         </div>
         <div class="dial-label" id="dialLabel">Ready</div>
@@ -364,7 +358,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
       <div class="side">
         <div class="panel" id="pIdle">
           <div class="banner" id="wkBanner" hidden><p id="wkBannerTxt"></p><button class="chip-btn" id="wkBannerBtn" style="color:var(--fg)">Open review</button></div>
-          <h2 id="idleTitle">Plant your next block.</h2>
+          <h2 id="idleTitle">Begin your next stroke.</h2>
           <p class="lead" id="idleLead">Pick a length and start.</p>
           <div class="field" id="tagField">
             <span class="lbl">Working on <span class="hint">(optional)</span></span>
@@ -388,9 +382,9 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
         </div>
 
         <div class="panel" id="pFocus" hidden>
-          <span class="eyebrow">Growing</span>
+          <span class="eyebrow">Painting</span>
           <div class="label-now" id="labelNow"></div>
-          <p class="lead" style="margin:0">Stay with it. The plant grows with every minute you put in.</p>
+          <p class="lead" style="margin:0">Stay with it. The brush moves with every minute you put in.</p>
           <div class="row">
             <button class="btn ghost" id="pauseBtn">Pause <kbd>Space</kbd></button>
             <button class="btn ghost" id="plusBtn">+10 min</button>
@@ -403,7 +397,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 
         <div class="panel" id="pBreak" hidden>
           <span class="eyebrow" id="breakEyebrow">Break</span>
-          <h2 id="breakTitle">It bloomed. Rest now.</h2>
+          <h2 id="breakTitle">The circle is drawn. Rest now.</h2>
           <div class="breath"><div class="orb" id="orb"></div><p id="breathText">Breathe in</p></div>
           <div class="field">
             <label class="lbl" for="noteInput">What did you get done? <span class="hint">(optional)</span></label>
@@ -452,7 +446,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
       <div class="demo" id="demoGarden" hidden>Example data. Your own blocks replace it after your first one.</div>
       <div class="card">
         <div class="bar-head">
-          <h3 id="gTitle">Garden</h3>
+          <h3 id="gTitle">Gallery</h3>
           <div class="seg" id="gRangeSeg">
             <button data-g="day" aria-pressed="false">Day</button>
             <button data-g="week" aria-pressed="true">Week</button>
@@ -597,7 +591,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
     </div>
     <div id="ob2" class="stack" hidden>
       <h2>Set a daily goal?</h2>
-      <p class="muted">A goal turns hours into a finish line. The garden fills toward it and celebrates when you reach it.</p>
+      <p class="muted">A goal turns hours into a finish line. The day's sheet fills toward it and gets a seal when you reach it.</p>
       <div class="len" id="obGoal"><button data-v="0">No goal</button><button data-v="60">1h</button><button data-v="120">2h</button><button data-v="180">3h</button><button data-v="240">4h</button><button data-v="360">6h</button></div>
     </div>
     <div id="ob3" class="stack" hidden>
@@ -621,7 +615,9 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 "use strict";
 const CHAIN_GAP=45, DAYMS=86400000;
 const LABELS=['','Scattered','Distracted','Steady','Absorbed','Flow'];
-const TAG_COLORS=['#386641','#6A994E','#A7C957','#BC4749','#7A5A43','#5B8A72'];
+const TAG_COLORS=['#2F3E5C','#5E6B4E','#B8863B','#B33A2A','#6B4E6B','#4F6A75'];
+const OLD_TAG_COLORS=['#386641','#6A994E','#A7C957','#BC4749','#7A5A43','#5B8A72'];
+const inkTag=c=>{const i=OLD_TAG_COLORS.indexOf(String(c||'').toUpperCase());return i>=0?TAG_COLORS[i]:c};
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
@@ -836,23 +832,23 @@ function syncNoise(){noise(S.settings.noise&&S.run&&S.run.phase==='focus'&&!S.ru
 let wake=null;
 async function holdWake(on){try{if(on&&!wake&&navigator.wakeLock){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}else if(!on&&wake){await wake.release();wake=null}}catch(e){wake=null}}
 
-/* plant scene */
-const RING=678.58,ring=$('#ring'),stem=$('#stem'),leaves=$$('#plant .lf'),flowerScale=$('#flowerScale');
+/* ink scene: the ensō is the timer, ink spreads as you work, a seal marks a finished block */
+const RING=640.88,ENSO=615.25,ring=$('#ring'),ringWash=$('#ringWash'),blots=$$('#inkdrop .ib'),seal=$('#seal');
 let lastG=-1,lastR=-1,bloomAnim=0,bloomUntil=0;
 function setScene(growth,ringFrac,bloom){
   growth=clamp(growth,0,1);ringFrac=clamp(ringFrac,0,1);bloom=clamp(bloom,0,1);
-  const rk=Math.round(ringFrac*1000);if(rk!==lastR){lastR=rk;ring.setAttribute('stroke-dashoffset',(RING*(1-ringFrac)).toFixed(2))}
+  const rk=Math.round(ringFrac*1000);if(rk!==lastR){lastR=rk;const off=(ENSO*(1-ringFrac)).toFixed(2);ring.setAttribute('stroke-dashoffset',off);ringWash.setAttribute('stroke-dashoffset',off);ring.style.opacity=ringFrac<.003?0:1;ringWash.style.opacity=ringFrac<.003?0:''}
   const gk=Math.round(growth*1000)+'_'+Math.round(bloom*100);if(gk===lastG)return;lastG=gk;
-  stem.setAttribute('stroke-dashoffset',(1-Math.max(growth,.06)).toFixed(4));
-  leaves.forEach(l=>{const at=+l.dataset.at,s=clamp((growth-at)/0.1,0,1);l.setAttribute('transform','scale('+s.toFixed(3)+')')});
-  flowerScale.setAttribute('transform','scale('+bloom.toFixed(3)+')');
+  blots.forEach(b=>{const at=+b.dataset.at,k=clamp((growth-at)/0.28,0,1),e=1-Math.pow(1-k,2),cx=b.dataset.cx,cy=b.dataset.cy;
+    b.setAttribute('transform','translate('+cx+' '+cy+') scale('+e.toFixed(3)+') translate('+(-cx)+' '+(-cy)+')')});
+  seal.setAttribute('transform','scale('+bloom.toFixed(3)+') rotate('+((1-bloom)*-14).toFixed(1)+')');
 }
 function animateBloom(){const t0=performance.now();bloomUntil=t0+1150;cancelAnimationFrame(bloomAnim);
-  const step=now=>{const t=clamp((now-t0)/1100,0,1),k=t<1?(1-Math.pow(1-t,3))*(1+.18*Math.sin(t*Math.PI)):1;lastG=-1;setScene(1,1,k);if(t<1)bloomAnim=requestAnimationFrame(step)};
+  const step=now=>{const t=clamp((now-t0)/700,0,1),k=t<1?1+.6*Math.pow(1-t,3):1;lastG=-1;setScene(1,1,t<.05?0:k);if(t<1)bloomAnim=requestAnimationFrame(step)};
   bloomAnim=requestAnimationFrame(step)}
 function petalRain(){const box=$('#petals');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;let h='';
-  for(let i=0;i<22;i++)h+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;animation-delay:'+(Math.random()*1.2).toFixed(2)+'s;animation-duration:'+(2.4+Math.random()*1.6).toFixed(2)+'s"></i>';
-  box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},4500)}
+  for(let i=0;i<18;i++){const sz=(6+Math.random()*22).toFixed(0);h+='<i style="left:'+(5+Math.random()*90).toFixed(1)+'%;top:'+(5+Math.random()*80).toFixed(1)+'%;width:'+sz+'px;height:'+sz+'px;animation-delay:'+(Math.random()*1.1).toFixed(2)+'s"></i>'}
+  box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},4200)}
 
 /* state machine */
 function workedSec(r,now){return (now-r.startedAt-r.pausedTotal-(r.pausedAt?now-r.pausedAt:0))/1000}
@@ -886,9 +882,9 @@ function endWork(early,silent){
   saveRun();holdWake(false);syncNoise();renderAll();
   if(zen)setZen(false);const ms=checkMilestone();announce('Block complete. Break started.');
   if(!silent){
-    if(ms){chime('goal');animateBloom();petalRain();toast('Milestone: '+ms[0]+' hours planted. '+ms[1]+' unlocked.')}
+    if(ms){chime('goal');animateBloom();petalRain();toast('Milestone: '+ms[0]+' hours painted. '+ms[1]+' unlocked.')}
     else if(hitGoal){chime('goal');animateBloom();petalRain();toast('Daily goal reached. '+fmtDur(after)+' today.')}
-    else{chime('focus');animateBloom();toast(early?fmtDur(actual)+' of work planted':'Block complete. '+fmtDur(actual)+' planted.')}
+    else{chime('focus');animateBloom();toast(early?fmtDur(actual)+' of work painted':'Block complete. '+fmtDur(actual)+' painted.')}
   }
   setTimeout(()=>{const n=$('#noteInput');if(n&&!n.closest('[hidden]'))n.focus({preventScroll:true})},60);
 }
@@ -909,7 +905,7 @@ function toBreakEnd(){const b=S.run;b.phase='breakEnd';saveRun();chime('break');
 function skipBreak(){if(!S.run||S.run.phase!=='break')return;saveNoteFrom('#noteInput');closeBreak(false);startWork()}
 function nextBlock(){if(!S.run||S.run.phase!=='breakEnd')return;saveNoteFrom('#noteInput2');closeBreak(false);startWork()}
 function stopForNow(){if(S.run&&S.run.sid){saveNoteFrom(S.run.phase==='break'?'#noteInput':'#noteInput2')}if(S.run&&(S.run.phase==='break'||S.run.phase==='breakEnd'))closeBreak(true);S.settings.sinceLong=0;saveSettings();S.run=null;saveRun();holdWake(false);renderAll();toast('Saved. See you next block.')}
-function rate(n){const b=S.run;if(!b||!b.sid)return;const s=findS(b.sid);if(!s)return;s.rating=s.rating===n?null:n;upsert(s);renderRates();renderBed();if(s.rating===5)toast('A flow block. It gets a flower in the garden.')}
+function rate(n){const b=S.run;if(!b||!b.sid)return;const s=findS(b.sid);if(!s)return;s.rating=s.rating===n?null:n;upsert(s);renderRates();renderBed();if(s.rating===5)toast('A flow block. Darkest ink.')}
 function saveNoteFrom(sel){const b=S.run;if(!b||!b.sid)return;const s=findS(b.sid),v=$(sel).value.trim();if(s&&v!==(s.note||'')){s.note=v;upsert(s)}}
 
 /* loop */
@@ -935,8 +931,8 @@ function showPanel(id){['pIdle','pFocus','pBreak','pBreakEnd'].forEach(p=>$('#'+
 function setChoice(sel,inputSel,val,div){let hit=false;$$(sel+' button').forEach(b=>{const on=+b.dataset.v===val;if(on)hit=true;b.setAttribute('aria-pressed',String(on))});const inp=inputSel&&$(inputSel);if(inp&&document.activeElement!==inp)inp.value=hit?'':(val?(div?val/div:val):'')}
 function greeting(){const h=new Date().getHours(),m=todayMin(),g=S.settings.dayGoal;
   if(g&&m>=g)return ['Goal reached today.','Anything more is a bonus. Keep going or rest, both count.'];
-  if(m>0)return ['Keep the garden growing.',fmtDur(m)+' planted today'+(g?', '+fmtDur(g-m)+' to your goal.':'. One more?')];
-  return [h<12?'Good morning. Plant the first block.':h<18?'Plant your first block today.':'One block before the day ends?','Pick a length and start. Keep going and it blooms.']}
+  if(m>0)return ['Keep the ink flowing.',fmtDur(m)+' painted today'+(g?', '+fmtDur(g-m)+' to your goal.':'. One more?')];
+  return [h<12?'Good morning. Begin the first stroke.':h<18?'Make your first stroke today.':'One stroke before the day ends?','Pick a length and start. Stay with it and the circle closes.']}
 function renderTagChips(){
   const st=S.settings,cur=tagOf(st.lastTag)?st.lastTag:null;
   let h=st.tags.map(t=>'<button data-tag="'+t.id+'" aria-pressed="'+(cur===t.id)+'"><span class="dot" style="background:'+t.color+'"></span>'+esc(t.name)+'</button>').join('');
@@ -946,7 +942,7 @@ function renderTagChips(){
 }
 function renderTimer(){
   const r=S.run,ph=r?r.phase:'idle',st=S.settings;$('#app').dataset.phase=ph;
-  $('#plant').classList.toggle('live',ph==='focus'&&!(r&&r.pausedAt));
+  $('#inkdrop').classList.toggle('live',ph==='focus'&&!(r&&r.pausedAt));
   if(!r){
     showPanel('pIdle');const g=greeting();$('#idleTitle').textContent=g[0];$('#idleLead').textContent=g[1];
     $('#dialLabel').textContent='Ready';$('#digits').textContent=fmtClock(st.work*60);
@@ -955,14 +951,14 @@ function renderTimer(){
     if(!document.querySelector('#tagChips input'))renderTagChips();renderWkBanner();
     $('#startBtn').innerHTML='Start '+st.work+' min <kbd>Space</kbd>';
   }else if(ph==='focus'){
-    showPanel('pFocus');$('#dialLabel').textContent=r.pausedAt?'Paused':'Growing';
+    showPanel('pFocus');$('#dialLabel').textContent=r.pausedAt?'Paused':'Painting';
     $('#dialSub').textContent=(r.planned+r.ext)+' min block';
     $('#labelNow').innerHTML=r.tag&&tagOf(r.tag)?'<span class="dot" style="background:'+tagColor(r.tag)+'"></span>'+esc(tagName(r.tag)):'Deep work';
     $('#pauseBtn').innerHTML=(r.pausedAt?'Resume':'Pause')+' <kbd>Space</kbd>';$('#zenPause').textContent=r.pausedAt?'Resume':'Pause';
   }else if(ph==='break'){
     showPanel('pBreak');$('#dialLabel').textContent=r.long?'Long break':'Break';
     $('#breakEyebrow').textContent=(r.long?'Long break, ':'Break, ')+r.len+' min';
-    $('#breakTitle').textContent=r.work&&r.work.early?'Good work. Rest now.':'It bloomed. Rest now.';
+    $('#breakTitle').textContent=r.work&&r.work.early?'Good work. Rest now.':'The circle is drawn. Rest now.';
     $('#dialSub').textContent='Back at '+new Date(r.endsAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     $('#orb').style.animationDelay='-'+(Date.now()%8000)+'ms';
     const s=findS(r.sid);if(document.activeElement!==$('#noteInput'))$('#noteInput').value=s&&s.note||'';renderRates();
@@ -985,27 +981,40 @@ function streak(){
     d.setDate(d.getDate()-1)}
   return n}
 function weekMin(ts){const ws=startOfWeek(ts).getTime(),we=ws+7*DAYMS;return S.sessions.filter(s=>s.start>=ws&&s.start<we).reduce((a,s)=>a+s.actual,0)}
+/* One visual language everywhere:
+   height or length = time worked, on a shared scale
+   ink darkness = focus rating (1 pale ... 5 black); unrated blocks are drawn as an outline
+   red seal = goal reached */
+const INK_OP=r=>r==null?null:[0,.2,.38,.57,.77,.97][Math.round(r)];
+function brushPath(x,base,H,w){
+  const n=v=>v.toFixed(1),top=base-H,my=base-H*.5;w=Math.min(w,Math.max(H*.9,3));
+  return 'M'+n(x-w*.5)+' '+n(top+w*.3)+' Q'+n(x-w*.6)+' '+n(top-w*.25)+' '+n(x+w*.1)+' '+n(top-w*.32)+' Q'+n(x+w*.66)+' '+n(top-w*.08)+' '+n(x+w*.5)+' '+n(top+w*.4)
+    +' L'+n(x+w*.44)+' '+n(my)+' L'+n(x+w*.4)+' '+n(base-w*.35)+' Q'+n(x+w*.36)+' '+n(base)+' '+n(x)+' '+n(base)+' Q'+n(x-w*.38)+' '+n(base)+' '+n(x-w*.42)+' '+n(base-w*.35)+' L'+n(x-w*.46)+' '+n(my)+'Z'}
+function brush(x,base,H,w,op){
+  if(H<=0)return '';const d=brushPath(x,base,H,w);
+  if(op==null)return '<path class="stroke" style="fill:none;stroke:var(--ink);stroke-width:1.3" opacity=".75" filter="url(#brushEdge)" d="'+d+'"/>';
+  return '<path class="stroke wash" opacity="'+(op*.25).toFixed(2)+'" transform="translate(1.4 1)" d="'+d+'"/><path class="stroke" opacity="'+op.toFixed(2)+'" filter="url(#brushEdge)" d="'+d+'"/>'}
+function sealMark(x,y,sz,rot){return '<rect class="seal" x="'+(x-sz/2).toFixed(1)+'" y="'+(y-sz/2).toFixed(1)+'" width="'+sz.toFixed(1)+'" height="'+sz.toFixed(1)+'" rx="'+(sz*.14).toFixed(1)+'" transform="rotate('+(rot||-5)+' '+x.toFixed(1)+' '+y.toFixed(1)+')" filter="url(#brushEdge)"/>'}
+function inkKey(){
+  const sw=(op,lbl)=>'<span style="display:inline-flex;align-items:center;gap:4px"><svg width="12" height="18" viewBox="0 0 12 18" aria-hidden="true">'+brush(6,17,15,7,op)+'</svg>'+lbl+'</span>';
+  return '<span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap">Focus: '+sw(INK_OP(1),'1')+sw(INK_OP(2),'2')+sw(INK_OP(3),'3')+sw(INK_OP(4),'4')+sw(INK_OP(5),'5 flow')+sw(null,'not rated')+'</span>'}
 function sprout(x,base,s,cls){
-  const h=clamp(18+s.actual*0.55,22,66),top=base-h,big=h>40,tc=s.tag&&tagOf(s.tag)?tagColor(s.tag):null;
-  let g='<g class="'+cls+'"><path class="stem" d="M'+x+' '+base+' C'+(x-2)+' '+(base-h*.4)+' '+(x+2)+' '+(base-h*.7)+' '+x+' '+top+'"/>';
-  g+='<path class="leaf" d="M'+x+' '+(base-h*.3)+' c5 -7 14 -7 18 -1 c-5 5 -13 5 -18 1z"/>';
-  g+='<path class="leaf alt" d="M'+x+' '+(base-h*.5)+' c-5 -7 -14 -7 -18 -1 c5 5 13 5 18 1z"/>';
-  if(big)g+='<path class="leaf" d="M'+x+' '+(base-h*.72)+' c4 -6 11 -6 14 -1 c-4 4 -10 4 -14 1z"/>';
-  if(s.rating===5){g+='<g transform="translate('+x+' '+top+')">';for(let i=0;i<6;i++)g+='<ellipse class="petal" cx="0" cy="-5.5" rx="3.6" ry="5.5" transform="rotate('+(i*60)+')"/>';g+='<circle class="core" r="3"/></g>'}
-  else g+='<circle class="bud" cx="'+x+'" cy="'+top+'" r="'+(s.rating===4?4:2.6)+'"/>';
-  if(tc)g+='<rect x="'+(x-9)+'" y="'+(base+3)+'" width="18" height="4" rx="2" fill="'+tc+'"/>';
-  return g+'<title>'+hm(s.start)+', '+fmtDur(s.actual)+(s.tag&&tagOf(s.tag)?', '+esc(tagName(s.tag)):'')+(s.note?': '+esc(s.note):'')+(s.rating?', focus '+s.rating:'')+'</title></g>';
+  const h=clamp(s.actual*.5,5,66),tc=s.tag&&tagOf(s.tag)?tagColor(s.tag):null;
+  let g='<g class="'+cls+'">'+brush(x,base,h,10,INK_OP(s.rating));
+  if(tc)g+='<rect x="'+(x-9)+'" y="'+(base+5)+'" width="18" height="3" rx="1.5" fill="'+tc+'"/>';
+  return g+'<title>'+hm(s.start)+', '+fmtDur(s.actual)+(s.tag&&tagOf(s.tag)?', '+esc(tagName(s.tag)):'')+(s.note?': '+esc(s.note):'')+(s.rating?', focus '+s.rating:', not rated')+'</title></g>';
 }
 function renderBed(){
   const t=todaySessions(),min=t.reduce((a,s)=>a+s.actual,0),flow=t.filter(s=>s.rating===5).length,wk=weekMin(Date.now()),st=streak(),g=S.settings.dayGoal,wg=S.settings.weekGoal;
-  $('#bedHead').innerHTML='<h3>Today’s garden</h3><span>Worked <b>'+fmtDur(min)+'</b></span><span>Blocks <b>'+t.length+'</b></span><span>Flowers <b>'+flow+'</b></span><span>This week <b>'+fmtDur(wk)+(wg?' / '+fmtGoal(wg):'')+'</b></span><span>Streak <b>'+st+' day'+(st===1?'':'s')+'</b></span>';
+  $('#bedHead').innerHTML='<h3>Today’s sheet</h3><span>Worked <b>'+fmtDur(min)+'</b></span><span>Blocks <b>'+t.length+'</b></span><span>Flow blocks <b>'+flow+'</b></span><span>This week <b>'+fmtDur(wk)+(wg?' / '+fmtGoal(wg):'')+'</b></span><span>Streak <b>'+st+' day'+(st===1?'':'s')+'</b></span>';
   const bar=$('#dayGoalBar');
   if(g){bar.hidden=false;const p=clamp(min/g,0,1);$('#dayGoalFill').style.width=(p*100).toFixed(1)+'%';bar.classList.toggle('done',min>=g);$('#dayGoalTxt').textContent=min>=g?'Goal reached, '+fmtDur(min):fmtDur(min)+' of '+fmtGoal(g)}else bar.hidden=true;
-  if(!t.length){$('#garden').innerHTML='<p class="hint" style="margin:2px 0 0">Every block you finish grows a plant here. Blocks you rate 5 bloom.</p>';S.justPlanted=null;return}
+  if(!t.length){$('#garden').innerHTML='<p class="hint" style="margin:2px 0 0">Every block you finish becomes a brushstroke here: taller means longer, darker ink means deeper focus. When you reach your daily goal, the sheet gets a red seal.</p>';S.justPlanted=null;return}
   const gap=46,W=Math.max(($('#garden').clientWidth||600)-2,t.length*gap+40),H=88,base=72;
-  let svg='<rect class="ground" x="0" y="'+base+'" width="'+W+'" height="12" rx="6" style="fill:var(--sunk)"/>';
+  let svg='<rect class="ground" x="0" y="'+(base+3)+'" width="'+W+'" height="1.5" rx=".75" style="fill:var(--line)"/>';
   t.forEach((s,i)=>{svg+=sprout(26+i*gap,base,s,s.id===S.justPlanted?'new':'')});
-  $('#garden').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" role="img" aria-label="Today’s blocks as plants">'+svg+'</svg>';
+  if(g&&min>=g)svg+=sealMark(26+t.length*gap+4,base-12,16,-6);
+  $('#garden').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" role="img" aria-label="Today’s blocks as brushstrokes">'+svg+'</svg>';
   S.justPlanted=null;
 }
 function renderKeys(){}
@@ -1022,25 +1031,21 @@ function demo(){
       out.push({id:'demo'+d+'_'+i,start:t,end:t+L*60000,label:'',tag:tags[Math.floor(rnd()*3)],note:rnd()<.6?notes[Math.floor(rnd()*notes.length)]:'',planned:L,actual:L,ext:0,rating:rnd()<.85?r:null,brkPlanned:bp,brkActual:ba,brkOver:ba-bp});t+=(L+ba)*60000}}
   return demoCache=out;
 }
-const DEMO_TAGS=[{id:'d1',name:'Learning',color:'#6A994E'},{id:'d2',name:'Business',color:'#386641'},{id:'d3',name:'Content',color:'#BC4749'}];
-const isDemo=()=>!S.sessions.length;
+const DEMO_TAGS=[{id:'d1',name:'Learning',color:'#2F3E5C'},{id:'d2',name:'Business',color:'#5E6B4E'},{id:'d3',name:'Content',color:'#B33A2A'}];
+const hasSavedLogin=()=>{try{for(let i=0;i<localStorage.length;i++){if(/^sb-.*-auth-token$/.test(localStorage.key(i)))return true}}catch(e){}return false};
+const isDemo=()=>!S.sessions.length&&!authUser&&!hasSavedLogin();
 const data=()=>isDemo()?demo():S.sessions;
 const tagsAll=()=>isDemo()?DEMO_TAGS:S.settings.tags;
 const tagFind=id=>tagsAll().find(t=>t.id===id)||null;
 
 /* garden tab */
-function aggDays(D){const m={};D.forEach(s=>{const k=dayKey(s.start),a=m[k]||(m[k]={h:0,n:0,flow:0});a.h+=s.actual/60;a.n++;if(s.rating===5)a.flow++});return m}
-function gLeaf(x,y,s,dir,alt){const n=v=>v.toFixed(1);
-  return '<path class="leaf'+(alt?' alt':'')+'" d="M'+n(x)+' '+n(y)+' c'+n(dir*5*s)+' '+n(-7*s)+' '+n(dir*14*s)+' '+n(-7*s)+' '+n(dir*18*s)+' '+n(-s)+' c'+n(-dir*5*s)+' '+n(5*s)+' '+n(-dir*13*s)+' '+n(5*s)+' '+n(-dir*18*s)+' '+n(s)+'z"/>'}
-function gFlower(x,y,r){let g='<g transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+')">';for(let i=0;i<6;i++)g+='<ellipse class="petal" cx="0" cy="'+(-r).toFixed(1)+'" rx="'+(r*.62).toFixed(1)+'" ry="'+r.toFixed(1)+'" transform="rotate('+i*60+')"/>';return g+'<circle class="core" r="'+(r*.55).toFixed(1)+'"/></g>'}
-function gPlant(x,base,H,nLeaves,flowers){
-  if(H<=0)return '<ellipse class="soil" cx="'+x.toFixed(1)+'" cy="'+base.toFixed(1)+'" rx="7" ry="2.2"/>';
-  const top=base-H,s=clamp(H/60,.45,1.35);
-  let g='<path class="stem" stroke-width="'+clamp(H/24,1.6,4).toFixed(1)+'" d="M'+x.toFixed(1)+' '+base.toFixed(1)+' C'+(x-2*s).toFixed(1)+' '+(base-H*.4).toFixed(1)+' '+(x+2*s).toFixed(1)+' '+(base-H*.7).toFixed(1)+' '+x.toFixed(1)+' '+top.toFixed(1)+'"/>';
-  for(let i=0;i<nLeaves;i++){const y=base-H*(0.2+0.62*(i/Math.max(1,nLeaves)));g+=gLeaf(x,y,s*(1-i*0.05),i%2?-1:1,i%2)}
-  if(flowers>0){g+=gFlower(x,top,5.5*s+1.5);if(flowers>1)g+=gFlower(x+10*s,top+H*.3,4*s+1);if(flowers>2)g+=gFlower(x-10*s,top+H*.45,4*s+1)}
-  else g+='<circle class="bud" cx="'+x.toFixed(1)+'" cy="'+top.toFixed(1)+'" r="'+(2.2*s+.8).toFixed(1)+'"/>';
-  return g;
+function aggDays(D){const m={};D.forEach(s=>{const k=dayKey(s.start),a=m[k]||(m[k]={h:0,n:0,flow:0,rs:0,rn:0});a.h+=s.actual/60;a.n++;if(s.rating===5)a.flow++;if(s.rating){a.rs+=s.rating;a.rn++}});return m}
+const avgR=a=>a&&a.rn?a.rs/a.rn:null;
+const goalMet=a=>!isDemo()&&S.settings.dayGoal>0&&a&&a.h*60>=S.settings.dayGoal;
+/* one small ink painting: a main stroke sized by hours, more strokes for more work, red seals for flow blocks */
+function gStroke(x,base,H,w,r,met){
+  if(H<=0)return '<ellipse class="dryspot" cx="'+x.toFixed(1)+'" cy="'+(base-1).toFixed(1)+'" rx="3" ry="1.6"/>';
+  return brush(x,base,H,w,INK_OP(r))+(met?sealMark(x+w*.5+9,base-H+4,11,-6):'');
 }
 const level=h=>h<=0?0:h<1?1:h<2.5?2:h<4.5?3:4;
 function gPeriod(){const a=new Date(S.gAnchor);a.setHours(0,0,0,0);
@@ -1048,6 +1053,11 @@ function gPeriod(){const a=new Date(S.gAnchor);a.setHours(0,0,0,0);
   if(S.gRange==='week'){const s=startOfWeek(a),e=new Date(s);e.setDate(s.getDate()+7);return {from:s.getTime(),to:e.getTime()}}
   if(S.gRange==='month')return {from:new Date(a.getFullYear(),a.getMonth(),1).getTime(),to:new Date(a.getFullYear(),a.getMonth()+1,1).getTime()};
   return {from:new Date(a.getFullYear(),0,1).getTime(),to:new Date(a.getFullYear()+1,0,1).getTime()}}
+function gPrevPeriod(p){const a=new Date(p.from);
+  if(S.gRange==='day')return {from:p.from-DAYMS,to:p.from,name:'the day before'};
+  if(S.gRange==='week')return {from:p.from-7*DAYMS,to:p.from,name:'last week'};
+  if(S.gRange==='month')return {from:new Date(a.getFullYear(),a.getMonth()-1,1).getTime(),to:p.from,name:'the month before'};
+  return {from:new Date(a.getFullYear()-1,0,1).getTime(),to:p.from,name:'the year before'}}
 function gShift(dir){const a=new Date(S.gAnchor);
   if(S.gRange==='day')a.setDate(a.getDate()+dir);else if(S.gRange==='week')a.setDate(a.getDate()+7*dir);
   else if(S.gRange==='month'){a.setDate(1);a.setMonth(a.getMonth()+dir)}else{a.setMonth(0,1);a.setFullYear(a.getFullYear()+dir)}
@@ -1060,29 +1070,29 @@ function gDay(list,W){
   const H=260,base=205,pl=18,pr=18,X=ts=>pl+((ts-t0)/3600000-h0)/(h1-h0)*(W-pl-pr);
   let g='';
   for(let h=h0;h<=h1;h++){const x=X(t0+h*3600000).toFixed(1);g+='<line class="gridl" x1="'+x+'" x2="'+x+'" y1="16" y2="'+base+'"/>';if(h1-h0<=12||(h-h0)%2===0)g+='<text x="'+x+'" y="'+(base+30)+'" text-anchor="middle" font-size="11">'+pad(h%24)+':00</text>'}
-  g+='<rect class="ground" x="0" y="'+base+'" width="'+W+'" height="10" rx="5"/>';
-  list.forEach((s,i)=>{const x1=X(s.start),x2=X(s.start+s.actual*60000),mid=(x1+x2)/2,Hh=clamp(18+s.actual*1.1,20,170),t=tagFind(s.tag);
+  g+='<rect class="ground" x="0" y="'+(base+1)+'" width="'+W+'" height="10" rx="5"/>';
+  list.forEach((s,i)=>{const x1=X(s.start),x2=X(s.start+s.actual*60000),mid=(x1+x2)/2,Hh=clamp(s.actual*1.4,6,180),t=tagFind(s.tag);
     g+='<rect class="span" x="'+x1.toFixed(1)+'" y="'+(base+1)+'" width="'+Math.max(4,x2-x1).toFixed(1)+'" height="8" rx="4" fill="'+(t?t.color:'var(--sage)')+'"/>';
-    g+='<g class="grow" style="animation-delay:'+i*70+'ms">'+gPlant(mid,base,Hh,clamp(Math.round(s.actual/12),1,7),s.rating===5?1:0)+'<title>'+hm(s.start)+' to '+hm(s.start+s.actual*60000)+', '+fmtDur(s.actual)+(t?', '+esc(t.name):'')+(s.note?': '+esc(s.note):'')+(s.rating?', focus '+s.rating:'')+'</title></g>'});
-  if(!list.length)g+='<text x="'+(W/2)+'" y="'+(base-70)+'" text-anchor="middle" font-size="15">Nothing planted this day.</text>';
+    g+='<g class="grow" style="animation-delay:'+i*70+'ms">'+brush(mid,base,Hh,14,INK_OP(s.rating))+'<title>'+hm(s.start)+' to '+hm(s.start+s.actual*60000)+', '+fmtDur(s.actual)+(t?', '+esc(t.name):'')+(s.note?': '+esc(s.note):'')+(s.rating?', focus '+s.rating:'')+'</title></g>'});
+  if(!list.length)g+='<text x="'+(W/2)+'" y="'+(base-70)+'" text-anchor="middle" font-size="15">A blank sheet.</text>';
   const notes=list.filter(s=>s.note);
   let extra=notes.length?'<ul class="notes" style="margin-top:10px;max-height:none">'+notes.map(s=>{const t=tagFind(s.tag);return '<li><span class="d">'+hm(s.start)+'</span>'+(t?'<span class="dot" style="background:'+t.color+'"></span>':'')+'<span><b>'+esc(s.note)+'</b> <span class="hint">'+fmtDur(s.actual)+(t?', '+esc(t.name):'')+(s.rating?', focus '+s.rating:'')+'</span></span></li>'}).join('')+'</ul>':'';
   return {svg:'<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Blocks across the day">'+g+'</svg>'+extra,
-    legend:'<span>Each plant is one block, placed at the time you worked it. Taller means longer.</span><span>The bar on the ground shows how long it ran, coloured by tag.</span><span><i class="fl"></i>Flow block (rated 5)</span>'};
+    legend:'<span>Each stroke is one block at the time you worked it. Height = length (the full height is about 2 hours).</span><span>The bar on the line shows when it ran, coloured by tag.</span>'+inkKey()};
 }
 function gWeek(agg,p,W){
   const H=270,base=200,cw=W/7,tk=dayKey(Date.now()),scale=Math.max(4,(S.settings.dayGoal||0)/60,...Object.values(agg).map(a=>a.h));
-  const hOf=h=>h?clamp(16+h/scale*160,18,175):0;
+  const hOf=h=>h?clamp(h/scale*175,4,175):0;
   let g='<rect class="ground" x="0" y="'+base+'" width="'+W+'" height="10" rx="5"/>';
   if(S.settings.dayGoal&&!isDemo()){const y=base-hOf(S.settings.dayGoal/60);g+='<line class="goal" x1="0" x2="'+W+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'"/><text x="'+(W-4)+'" y="'+(y-5).toFixed(1)+'" text-anchor="end" font-size="11">daily goal</text>'}
   for(let i=0;i<7;i++){const d=new Date(p.from);d.setDate(d.getDate()+i);const k=dayKey(d),a=agg[k],x=cw*i+cw/2,h=a?a.h:0;
     if(k===tk)g+='<rect class="colbg" x="'+(cw*i+4).toFixed(1)+'" y="6" width="'+(cw-8).toFixed(1)+'" height="'+(H-12)+'" rx="16"/>';
-    g+='<g class="grow" style="animation-delay:'+i*70+'ms">'+gPlant(x,base,hOf(h),clamp(Math.round(h*1.6),1,9),a?a.flow:0)+'</g>';
+    g+='<g class="grow" style="animation-delay:'+i*70+'ms">'+gStroke(x,base,hOf(h),clamp(cw*.2,14,26),avgR(a),goalMet(a))+'</g>';
     g+='<text x="'+x.toFixed(1)+'" y="'+(base+28)+'" text-anchor="middle" font-size="12"'+(k===tk?' class="t-fg"':'')+'>'+d.toLocaleDateString([],{weekday:'short'})+' '+d.getDate()+'</text>';
     g+='<text x="'+x.toFixed(1)+'" y="'+(base+48)+'" text-anchor="middle" font-size="13" class="t-fg">'+(h?fmtDur(h*60):'')+'</text>';
     g+='<rect class="hit" data-day="'+k+'" x="'+(cw*i+4).toFixed(1)+'" y="6" width="'+(cw-8).toFixed(1)+'" height="'+(H-12)+'" rx="16"><title>'+dayTip(k,a)+'. Click to open the day.</title></rect>'}
   return {svg:'<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Hours per day this week">'+g+'</svg>',
-    legend:'<span>One plant per day. Height follows hours worked.</span><span><i class="fl"></i>Each flower is a flow block</span>'+(S.settings.dayGoal?'<span>The dashed line is your daily goal.</span>':'')+'<span>Click a day to see it hour by hour.</span>'};
+    legend:'<span>One stroke per day. Height = hours worked.</span>'+(S.settings.dayGoal&&!isDemo()?'<span>Dashed line = daily goal. <i class="fl"></i>Red seal = goal reached.</span>':'')+inkKey()+'<span>Ink shows the average focus of the day. Click a day to see it hour by hour.</span>'};
 }
 function gMonth(agg,p,W){
   const first=new Date(p.from),lead=(first.getDay()+6)%7,days=new Date(first.getFullYear(),first.getMonth()+1,0).getDate(),rows=Math.ceil((lead+days)/7);
@@ -1091,11 +1101,12 @@ function gMonth(agg,p,W){
   for(let i=0;i<days;i++){const c=(lead+i)%7,r=Math.floor((lead+i)/7),d=new Date(first.getFullYear(),first.getMonth(),i+1),k=dayKey(d),a=agg[k],x=c*cw,y=hd+r*ch,future=d.getTime()>Date.now();
     g+='<rect class="cell'+(k===tk?' today':'')+(future?' out':'')+'" x="'+(x+3).toFixed(1)+'" y="'+(y+3)+'" width="'+(cw-6).toFixed(1)+'" height="'+(ch-6)+'" rx="12"/>';
     g+='<text x="'+(x+12).toFixed(1)+'" y="'+(y+20)+'" font-size="11"'+(k===tk?' class="t-fg"':'')+'>'+(i+1)+'</text>';
-    if(a)g+='<text x="'+(x+cw-11).toFixed(1)+'" y="'+(y+20)+'" text-anchor="end" font-size="11" class="t-fg">'+f1(a.h)+'h'+(goal&&!isDemo()&&a.h>=goal?' ✓':'')+'</text>';
-    g+='<g class="grow" style="animation-delay:'+i*18+'ms">'+gPlant(x+cw/2,y+ch-13,a?clamp(10+a.h/scale*(ch-40),12,ch-34):0,a?clamp(Math.round(a.h*1.3),1,6):0,a?Math.min(3,a.flow):0)+'</g>';
+    if(a)g+='<text x="'+(x+cw-11).toFixed(1)+'" y="'+(y+20)+'" text-anchor="end" font-size="12" class="t-fg">'+f1(a.h)+'h</text>';
+    if(a){const lv=level(a.h),R=Math.min(cw,ch-24)*[0,.13,.19,.26,.33][lv];g+='<circle class="lv'+lv+' grow" cx="'+(x+cw/2).toFixed(1)+'" cy="'+(y+14+(ch-14)/2).toFixed(1)+'" r="'+R.toFixed(1)+'" filter="url(#inkSpread)" style="animation-delay:'+i*18+'ms"/>'}
+    if(goalMet(a))g+=sealMark(x+cw-16,y+ch-15,12,-6);
     g+='<rect class="hit" data-day="'+k+'" x="'+(x+3).toFixed(1)+'" y="'+(y+3)+'" width="'+(cw-6).toFixed(1)+'" height="'+(ch-6)+'" rx="12"><title>'+dayTip(k,a)+'</title></rect>'}
   return {svg:'<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Hours per day this month">'+g+'</svg>',
-    legend:'<span>Each day grows a plant sized by hours worked. Bare soil means no work that day.</span><span><i class="fl"></i>Flowers are flow blocks</span>'+(S.settings.dayGoal?'<span>A tick means the daily goal was met.</span>':'')+'<span>Click a day to open it.</span>'};
+    legend:'<span>Bigger, darker ink = more hours.</span><span><i style="background:var(--l1)"></i>under 1h</span><span><i style="background:var(--l2)"></i>1 to 2.5h</span><span><i style="background:var(--l3)"></i>2.5 to 4.5h</span><span><i style="background:var(--l4)"></i>4.5h or more</span>'+(S.settings.dayGoal&&!isDemo()?'<span><i class="fl"></i>Red seal = daily goal reached</span>':'')+'<span>Click a day to open it.</span>'};
 }
 function gYear(agg,p,W){
   const y0=new Date(p.from).getFullYear(),start=startOfWeek(new Date(y0,0,1)),cols=Math.ceil((new Date(y0+1,0,1)-start)/(7*DAYMS));
@@ -1106,19 +1117,19 @@ function gYear(agg,p,W){
   for(let c=0;c<cols;c++)for(let r=0;r<7;r++){const d=new Date(start);d.setDate(start.getDate()+c*7+r);if(d.getFullYear()!==y0)continue;
     const k=dayKey(d),a=agg[k],x=lw+c*step,y=top+r*step,fut=d.getTime()>now;
     g+='<rect class="lv'+level(a?a.h:0)+'" data-day="'+k+'" x="'+x+'" y="'+y+'" width="'+cs+'" height="'+cs+'" rx="3" style="cursor:pointer'+(fut?';opacity:.45':'')+'"><title>'+dayTip(k,a)+'</title></rect>';
-    if(a&&a.flow)g+='<rect class="flowring" x="'+(x+1)+'" y="'+(y+1)+'" width="'+(cs-2)+'" height="'+(cs-2)+'" rx="2.5" pointer-events="none"/>'}
-  const gridB=top+7*step,mt=Array.from({length:12},()=>({h:0,f:0}));
-  Object.keys(agg).forEach(k=>{const q=k.split('-').map(Number);if(q[0]===y0){mt[q[1]-1].h+=agg[k].h;mt[q[1]-1].f+=agg[k].flow}});
+    if(goalMet(a))g+='<rect class="flowring" x="'+(x+1)+'" y="'+(y+1)+'" width="'+(cs-2)+'" height="'+(cs-2)+'" rx="2.5" pointer-events="none"/>'}
+  const gridB=top+7*step,mt=Array.from({length:12},()=>({h:0,f:0,rs:0,rn:0}));
+  Object.keys(agg).forEach(k=>{const q=k.split('-').map(Number);if(q[0]===y0){const M=mt[q[1]-1];M.h+=agg[k].h;M.f+=agg[k].flow;M.rs+=agg[k].rs;M.rn+=agg[k].rn}});
   const maxM=Math.max(10,...mt.map(m=>m.h)),mw=GW/12,base=gridB+160;
   g+='<text x="0" y="'+(gridB+30)+'" font-size="12" class="t-fg">Months</text><rect class="ground" x="0" y="'+base+'" width="'+GW+'" height="10" rx="5"/>';
   mt.forEach((m,i)=>{const x=mw*i+mw/2;
-    g+='<g class="grow" style="animation-delay:'+i*60+'ms">'+gPlant(x,base,m.h?clamp(14+m.h/maxM*110,16,125):0,clamp(Math.round(m.h/5),1,9),Math.min(3,Math.ceil(m.f/4)))+'</g>';
+    g+='<g class="grow" style="animation-delay:'+i*60+'ms">'+gStroke(x,base,m.h?clamp(m.h/maxM*120,4,120):0,clamp(mw*.22,12,24),avgR(m),false)+'</g>';
     g+='<text x="'+x.toFixed(1)+'" y="'+(base+28)+'" text-anchor="middle" font-size="11">'+new Date(y0,i,1).toLocaleDateString([],{month:'short'})+'</text>';
     g+='<text x="'+x.toFixed(1)+'" y="'+(base+45)+'" text-anchor="middle" font-size="12" class="t-fg">'+(m.h?Math.round(m.h)+'h':'')+'</text>';
     g+='<rect class="hit" data-month="'+y0+'-'+i+'" x="'+(mw*i+3).toFixed(1)+'" y="'+(gridB+40)+'" width="'+(mw-6).toFixed(1)+'" height="'+(base-gridB+12)+'" rx="12"><title>'+new Date(y0,i,1).toLocaleDateString([],{month:'long'})+': '+fmtDur(m.h*60)+'. Click to open the month.</title></rect>'});
   const H=base+56;
   return {svg:'<svg viewBox="0 0 '+GW+' '+H+'" width="'+GW+'" height="'+H+'" role="img" aria-label="Every day of the year by hours worked">'+g+'</svg>',
-    legend:'<span>Each square is a day.</span><span><i style="background:var(--l0)"></i>none</span><span><i style="background:var(--l1)"></i>under 1h</span><span><i style="background:var(--l2)"></i>1 to 2.5h</span><span><i style="background:var(--l3)"></i>2.5 to 4.5h</span><span><i style="background:var(--l4)"></i>4.5h or more</span><span><i class="fl"></i>flow block that day</span><span>Below, one plant per month.</span>'};
+    legend:'<span>Each square is a day.</span><span><i style="background:var(--l0)"></i>none</span><span><i style="background:var(--l1)"></i>under 1h</span><span><i style="background:var(--l2)"></i>1 to 2.5h</span><span><i style="background:var(--l3)"></i>2.5 to 4.5h</span><span><i style="background:var(--l4)"></i>4.5h or more</span>'+(S.settings.dayGoal&&!isDemo()?'<span><i class="fl"></i>daily goal reached</span>':'')+'<span>Below, one stroke per month: height = hours, ink = average focus.</span>'};
 }
 function renderGardenTab(){
   $('#demoGarden').hidden=!isDemo();const D=data();
@@ -1133,6 +1144,8 @@ function renderGardenTab(){
   if(S.gRange==='day'){if(inP.length){const srt=inP.slice().sort((x,y)=>x.start-y.start);sum+='<span>First block <b>'+hm(srt[0].start)+'</b></span><span>Last ended <b>'+hm(srt[srt.length-1].start+srt[srt.length-1].actual*60000)+'</b></span>'}}
   else{const best=keys.slice().sort((x,y)=>agg[y].h-agg[x].h)[0];sum+='<span>Days worked <b>'+keys.length+'</b></span>'+(best?'<span>Best day <b>'+new Date(parseKey(best)).toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})+', '+fmtDur(agg[best].h*60)+'</b></span>':'')}
   if(rs.length)sum+='<span>Avg focus <b>'+mean(rs).toFixed(1)+'</b></span>';
+  const pv=gPrevPeriod(p),cur=p.to>Date.now(),pEnd=cur?pv.from+(Date.now()-p.from):pv.to,pt=D.filter(s=>s.start>=pv.from&&s.start<pEnd).reduce((x,s)=>x+s.actual,0);
+  if(pt>0){const d=Math.round((tot-pt)/pt*100);sum+='<span>vs '+(cur?'same point ':'')+pv.name+' <b class="'+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d+'%</b></span>'}
   $('#gSum').innerHTML=sum;
   const gb=$('#gGoalBar'),goal=isDemo()?0:S.gRange==='day'?S.settings.dayGoal:S.gRange==='week'?S.settings.weekGoal:0;
   if(goal){gb.hidden=false;$('#gGoalFill').style.width=(clamp(tot/goal,0,1)*100).toFixed(1)+'%';gb.classList.toggle('done',tot>=goal);$('#gGoalTxt').textContent=(tot>=goal?'Goal reached, ':'')+fmtDur(tot)+' of '+fmtGoal(goal)}else gb.hidden=true;
@@ -1284,14 +1297,14 @@ function renderOb(){
   $$('#obGoal button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===obSel.goal)));
   const all=SUGGEST.concat(Array.from(obSel.tags).filter(t=>SUGGEST.indexOf(t)<0));
   $('#obTags').innerHTML=all.map(t=>'<button data-ob="'+esc(t)+'" aria-pressed="'+obSel.tags.has(t)+'">'+esc(t)+'</button>').join('');
-  $('#obNext').textContent=obStep<3?'Next':'Start growing';
+  $('#obNext').textContent=obStep<3?'Next':'Start painting';
   $('#obNext').disabled=(obStep===1&&obSel.work==null)||(obStep===2&&obSel.goal==null);
 }
 function finishOb(){const st=S.settings;
   if(obSel.work){st.work=obSel.work;st.brk=obSel.work<=25?5:obSel.work>=90?15:10}
   if(obSel.goal!=null)st.dayGoal=obSel.goal;
   obSel.tags.forEach(n=>addTag(n));if(st.tags.length&&!st.lastTag)st.lastTag=null;
-  st.onboarded=true;saveSettings();$('#obModal').hidden=true;renderAll();toast('All set. Press Space to plant your first block.')}
+  st.onboarded=true;saveSettings();$('#obModal').hidden=true;renderAll();toast('All set. Press Space to begin your first block.')}
 
 /* add or edit a block */
 let ED={id:null,tag:null,rating:null};
@@ -1318,7 +1331,7 @@ function saveEditor(){
   if(!old||s.manual||Math.round(s.actual)!==Math.round(mn))s.planned=old&&!s.manual?s.planned:mn;
   s.start=start;s.end=start+mn*60000;s.actual=mn;s.tag=ED.tag||null;s.note=$('#edNote').value.trim();s.rating=ED.rating||null;
   upsert(s);S.sessions.sort((a,b)=>a.start-b.start);persistLocal();
-  closeEditor();renderAll();const ms=checkMilestone();if(ms){petalRain();toast('Milestone: '+ms[0]+' hours planted. '+ms[1]+' unlocked.')}else toast(old?'Block updated':fmtDur(mn)+' added to your garden');
+  closeEditor();renderAll();const ms=checkMilestone();if(ms){petalRain();toast('Milestone: '+ms[0]+' hours painted. '+ms[1]+' unlocked.')}else toast(old?'Block updated':fmtDur(mn)+' added to your gallery');
 }
 function deleteFromEditor(){
   const s=findS(ED.id);if(!s)return;const k=store.monthKey(s.start);
@@ -1363,13 +1376,13 @@ function setZen(on){zen=!!on;$('#app').classList.toggle('zen',zen);
 function announce(t){const l=$('#live');l.textContent='';setTimeout(()=>{l.textContent=t},50)}
 
 /* milestones */
-const MS=[[1,'First sprout'],[5,'Seedling'],[10,'Fern'],[25,'Wildflower'],[50,'Rosebud'],[100,'Hundred hours'],[250,'Orchard'],[500,'Old garden'],[1000,'Thousand hours']];
-const MS_STYLE=[[5,'#A7C957','#6A994E'],[6,'#6A994E','#A7C957'],[0,'#6A994E','#A7C957'],[5,'#BC4749','#A7C957'],[8,'#BC4749','#F2E8CF'],[6,'#D9686A','#386641'],[8,'#A7C957','#BC4749'],[10,'#386641','#BC4749'],[12,'#BC4749','#A7C957']];
+const MS=[[1,'Sumi ink'],[5,'Grey wash'],[10,'Indigo ink'],[25,'Ochre ink'],[50,'Moss ink'],[100,'Vermilion ink'],[250,'Plum ink'],[500,'Celadon ink'],[1000,'Gold leaf']];
+const MS_INK=['#23201D','#8A8378','#2F3E5C','#B8863B','#5E6B4E','#B33A2A','#6B4E6B','#7FA393','#C9A54A'];
 const lifetimeH=()=>S.sessions.reduce((a,s)=>a+s.actual,0)/60;
 function msReached(){const h=lifetimeH();return MS.filter(m=>h>=m[0]).length}
-function msIcon(i){const st=MS_STYLE[i],n=st[0];let g='<svg viewBox="0 0 56 64" aria-hidden="true"><path d="M28 60 C27 50 29 40 28 26" stroke="#6A994E" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M28 46 c5 -7 14 -7 17 -1 c-5 5 -12 5 -17 1z" fill="#6A994E"/><path d="M28 38 c-5 -7 -14 -7 -17 -1 c5 5 12 5 17 1z" fill="#A7C957"/>';
-  if(n===0){for(let k=0;k<5;k++)g+='<path d="M28 26 c'+(k%2?-1:1)*(4+k*2)+' -4 '+(k%2?-1:1)*(8+k*2)+' -10 '+(k%2?-1:1)*(6+k)+' -16" stroke="'+st[1]+'" stroke-width="2.2" fill="none" stroke-linecap="round"/>'}
-  else{g+='<g transform="translate(28 20)">';for(let k=0;k<n;k++)g+='<ellipse cx="0" cy="-8" rx="'+(n>8?3.2:4.4)+'" ry="8" fill="'+st[1]+'" transform="rotate('+(k*360/n)+')"/>';g+='<circle r="4.6" fill="'+st[2]+'"/></g>'}
+function msIcon(i){const c=MS_INK[i];let g='<svg viewBox="0 0 56 64" aria-hidden="true">';
+  g+='<circle cx="28" cy="30" r="22" fill="none" stroke="'+c+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="126 140" transform="rotate('+(-80+i*31)+' 28 30)" filter="url(#brushEdge)" opacity=".92"/>';
+  if(i===MS.length-1)g+='<rect x="38" y="44" width="9" height="9" rx="1.5" fill="#B33A2A"/>';
   return g+'</svg>'}
 function checkMilestone(silentInit){const r=msReached();
   if(S.settings.msSeen<0||silentInit&&S.settings.msSeen<0){S.settings.msSeen=r;saveSettings();return null}
@@ -1377,7 +1390,7 @@ function checkMilestone(silentInit){const r=msReached();
 function renderMilestones(){
   const h=isDemo()?0:lifetimeH(),r=MS.filter(m=>h>=m[0]).length,next=MS[r];
   $('#msRow').innerHTML=MS.map((m,i)=>'<div class="m'+(i<r?'':' locked')+(i===r?' next':'')+'">'+msIcon(i)+'<b>'+m[0]+'h</b><span>'+(i<r?m[1]:i===r?fmtDur((m[0]-h)*60)+' to go':'Locked')+'</span></div>').join('');
-  $('#msTxt').textContent=fmtDur(h*60)+' planted in total'+(next?'. Next: '+next[1]+' at '+next[0]+'h.':'. Every milestone reached.');
+  $('#msTxt').textContent=fmtDur(h*60)+' painted in total'+(next?'. Next: '+next[1]+' at '+next[0]+'h.':'. Every ink unlocked.');
 }
 
 /* backup */
@@ -1395,7 +1408,7 @@ function restoreBackup(file){
     o.sessions.filter(x=>x&&typeof x.id==='string'&&typeof x.start==='number'&&typeof x.actual==='number'&&x.actual>0).forEach(x=>{
       if(isDead(x))return;const cur=map.get(x.id);if(!cur||(x.u||0)>(cur.u||0)){map.set(x.id,Object.assign({rating:null,tag:null,note:'',label:''},x));touched.add(x.id);if(!cur)added++}});
     S.sessions=Array.from(map.values()).sort((a,b)=>a.start-b.start);
-    if(o.settings&&Array.isArray(o.settings.tags))o.settings.tags.forEach(t=>{if(t&&t.id&&t.name&&!tagOf(t.id))S.settings.tags.push({id:t.id,name:String(t.name).slice(0,24),color:TAG_COLORS.indexOf(t.color)>=0?t.color:TAG_COLORS[0]})});
+    if(o.settings&&Array.isArray(o.settings.tags))o.settings.tags.forEach(t=>{if(t&&t.id&&t.name&&!tagOf(t.id))S.settings.tags.push({id:t.id,name:String(t.name).slice(0,24),color:TAG_COLORS.indexOf(inkTag(t.color))>=0?inkTag(t.color):TAG_COLORS[0]})});
     if(o.reflections&&typeof o.reflections==='object')Object.keys(o.reflections).forEach(k=>{const v=o.reflections[k];if(v&&typeof v.t==='string'&&(!S.refl[k]||(v.u||0)>(S.refl[k].u||0)))S.refl[k]=v});
     persistLocal();ls.set('fm.refl',S.refl);store.saveBlocks(Array.from(touched));saveSettings();store.saveRefl();
     if(S.settings.msSeen>=0)S.settings.msSeen=msReached();
@@ -1511,6 +1524,7 @@ document.addEventListener('keydown',e=>{
 /* boot */
 if(S.run&&S.run.phase==='focus'&&!S.run.pausedAt&&Date.now()>=S.run.endsAt)endWork(false,true);
 if(S.run&&S.run.phase==='break'&&Date.now()>=S.run.endsAt){S.run.phase='breakEnd';saveRun()}
+(function(){let ch=false;S.settings.tags.forEach(t=>{const c=inkTag(t.color);if(c!==t.color){t.color=c;ch=true}});if(ch)saveSettings()})();
 initAuth();renderAll();store.init();checkMilestone(true);setTimeout(()=>{if(!authUser)maybeOnboard()},1500);
 })();
 </script>
