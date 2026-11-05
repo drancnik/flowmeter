@@ -232,6 +232,43 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .app.zen .digits{font-size:clamp(56px,11vw,88px)}
 .zen-ctrl{display:none;gap:10px;margin-top:16px;position:relative;flex-wrap:wrap;justify-content:center}
 .app.zen .zen-ctrl{display:flex}
+:root{--hok:var(--good)}
+.hrow{display:flex;gap:14px;align-items:center;padding:12px 2px;border-top:1px solid var(--line)}
+.hrow:first-child{border-top:0}
+.hchk{width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--surface);cursor:pointer;flex:none;font-size:18px;font-weight:800;color:var(--bg);display:grid;place-items:center;transition:background .15s,border-color .15s}
+.hchk:hover{border-color:var(--hok)}.hchk.on{background:var(--hok);border-color:var(--hok)}
+.hauto{width:40px;height:40px;border-radius:50%;border:2px dashed var(--line);flex:none;display:grid;place-items:center;font-weight:800;color:var(--bg)}
+.hrow.done .hauto{background:var(--hok);border:2px solid var(--hok)}
+.hcount{display:flex;align-items:center;gap:4px;flex:none}
+.hcount button{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-weight:800;font-size:16px;line-height:1}
+.hcount button:hover{border-color:var(--ph)}
+.hcount input{width:64px;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 6px;text-align:center;font-weight:700;font-size:15px;outline:none}
+.hrow.done .hcount input{border-color:var(--hok)}
+.hmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.hline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.hname{border:0;background:none;padding:0;text-align:left;font-weight:800;font-size:15.5px;cursor:pointer;color:var(--fg)}
+.hname:hover{text-decoration:underline}
+.pill.ok{background:var(--hok);color:var(--bg)}
+.hmeta{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:13px;color:var(--muted)}
+.hamt{font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
+.hbar{height:6px;border-radius:999px;background:var(--sunk);overflow:hidden;max-width:340px}.hbar span{display:block;height:100%;background:var(--hok);border-radius:999px;transition:width .4s}
+.linkish{border:0;background:none;padding:0;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;font:inherit;font-weight:700}
+.hgrid{display:grid;gap:3px;align-items:center}
+.hgrid .hd{font-size:10px;color:var(--muted);text-align:center;line-height:1.2;font-weight:700}
+.hgrid .hd b{display:block;font-size:11px;color:var(--fg)}.hgrid .hd.t b{color:var(--ph);text-decoration:underline}
+.hgname{border:0;background:none;text-align:left;font-weight:700;font-size:13.5px;padding:0 8px 0 0;cursor:pointer;color:var(--fg);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.hc{aspect-ratio:1;min-height:12px;border-radius:5px;border:0;padding:0;display:grid;place-items:center;font-size:11px;font-weight:800;line-height:1;background:var(--sunk);color:var(--fg);font-style:normal}
+button.hc{cursor:pointer}button.hc:hover{outline:2px solid var(--ph);outline-offset:1px}
+.hc.s-done,.hc.s-extra{background:var(--hok);color:var(--bg)}
+.hc.s-part,.hc.s-partopen{background:color-mix(in srgb,var(--hok) 38%,var(--sunk))}
+.hc.s-miss{background:var(--bloom-soft);color:var(--bloom)}
+.hc.s-off{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.hc.s-open{background:var(--sunk);box-shadow:inset 0 0 0 2px var(--ph)}
+.hc.s-future{visibility:hidden}
+.legend i.hc{width:16px;height:16px;min-height:0;display:inline-grid;vertical-align:-3px;margin-right:5px;font-size:10px}
+.hfacts{margin:0 0 6px;padding:0 0 0 18px;display:flex;flex-direction:column;gap:6px;font-size:14.5px}
+.hfacts .up{color:var(--good);font-weight:800}.hfacts .down{color:var(--bloom);font-weight:800}
+.rate{display:flex;align-items:center;gap:8px;min-width:130px}.rate .bt{flex:1;height:8px;border-radius:999px;background:var(--sunk);overflow:hidden}.rate .bt span{display:block;height:100%;background:var(--l3);border-radius:999px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .file-btn{position:relative;overflow:hidden}
 .file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
@@ -274,6 +311,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
     <div class="brand"><span class="mark" aria-hidden="true"></span>Flowmeter</div>
     <nav class="tabs" role="tablist" aria-label="Views">
       <button role="tab" id="t-focus" data-tab="focus" aria-selected="true">Timer</button>
+      <button role="tab" id="t-habits" data-tab="habits" aria-selected="false">Habits</button>
       <button role="tab" id="t-stats" data-tab="stats" aria-selected="false">Stats</button>
     </nav>
     <button class="icon-btn" id="setBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
@@ -381,6 +419,25 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
     </div>
   </section>
 
+  <!-- HABITS -->
+  <section id="tab-habits" hidden>
+    <div class="stack">
+      <div class="card">
+        <div class="bar-head"><h3 id="hTodayTitle">Today</h3><span class="hint" id="hTodaySum"></span><button class="chip-btn" id="hAdd">+ New habit</button></div>
+        <div id="hToday"></div>
+      </div>
+      <div class="card" id="hGridCard" hidden>
+        <div class="bar-head"><h3 id="hGridTitle">Last 4 weeks</h3><span class="hint">Click a day to tick it off or fix it.</span></div>
+        <div id="hGrid"></div>
+        <div class="legend" id="hLegend"></div>
+      </div>
+      <div class="card" id="hSlackCard" hidden>
+        <div class="bar-head"><h3>Where you're slacking</h3><span class="hint">Last 30 days, scheduled days only</span></div>
+        <div id="hSlack"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- STATS -->
   <section id="tab-stats" hidden>
     <div class="stack">
@@ -477,6 +534,24 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
   </div>
 </div>
 
+<!-- ADD / EDIT HABIT -->
+<div class="modal" id="hModal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="hmTitle">
+    <div class="sheet-head"><h2 id="hmTitle">New habit</h2><button class="icon-btn" id="hmClose" aria-label="Close">&#215;</button></div>
+    <div class="field"><label class="lbl" for="hmName">Name</label><input type="text" id="hmName" maxlength="60" autocomplete="off" placeholder="Gym, Read, No phone before 9"></div>
+    <div class="field"><span class="lbl">Type</span><div class="seg" id="hmKind"><button data-k="check">Done or not</button><button data-k="count">Amount</button><button data-k="focus">Focus time</button></div><span class="hint" id="hmKindHint"></span></div>
+    <div class="field" id="hmCountF" hidden><span class="lbl">Daily target</span><div class="len"><input type="number" id="hmTarget" min="0.01" max="100000" step="any" placeholder="30" aria-label="Daily target"><input type="text" id="hmUnit" maxlength="20" placeholder="unit: min, pages, glasses" style="width:210px;padding:6px 12px;font-size:14px" aria-label="Unit"></div></div>
+    <div class="field" id="hmFocusF" hidden><span class="lbl">Focus time per day</span><div class="len"><input type="number" id="hmHours" min="0.25" max="16" step="0.25" placeholder="3" aria-label="Hours per day"><span class="unit">hours</span></div><span class="lbl" style="margin-top:4px">Count blocks tagged</span><div class="tags" id="hmTags"></div></div>
+    <div class="field"><span class="lbl">Days</span><div class="seg" id="hmDays"></div><div class="row" style="gap:6px"><button class="chip-btn" data-preset="127">Every day</button><button class="chip-btn" data-preset="31">Weekdays</button><button class="chip-btn" data-preset="96">Weekends</button></div></div>
+    <p class="err" id="hmErr" hidden></p>
+    <div class="row">
+      <button class="btn danger small" id="hmDel">Delete</button>
+      <button class="btn ghost small" id="hmCancel">Cancel</button>
+      <button class="btn small" id="hmSave">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- ADD / EDIT BLOCK -->
 <div class="modal" id="edModal" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="edTitle">
@@ -557,7 +632,7 @@ const S={
   sessions:ls.get('fm.sessions',[]).map(s=>Object.assign({label:s.label!=null?s.label:(s.action||''),rating:null,tag:null,note:''},s)),
   settings:Object.assign({},defaults,ls.get('fm.settings2',{})),
   run:ls.get('fm.run2',null),
-  refl:ls.get('fm.refl',{}),tab:'focus',sRange:'week',sAnchor:Date.now(),sAll:false
+  refl:ls.get('fm.refl',{}),habits:ls.get('fm.habits',[]),hlogs:ls.get('fm.hlogs',{}),tab:'focus',sRange:'week',sAnchor:Date.now(),sAll:false
 };
 
 /* storage: browser + account, live across devices */
@@ -571,7 +646,7 @@ function mergeSessions(list){let ch=false;const map=new Map(S.sessions.map(x=>[x
   const before=map.size;const arr=Array.from(map.values()).filter(x=>!isDead(x));if(arr.length!==before)ch=true;
   if(ch)S.sessions=arr.sort((a,b)=>a.start-b.start);return ch}
 let rerenderT=0;
-function softRender(){clearTimeout(rerenderT);rerenderT=setTimeout(()=>{if(!$('#edModal').hidden||!$('#setModal').hidden||!$('#obModal').hidden){softRender();return}renderAll()},250)}
+function softRender(){clearTimeout(rerenderT);rerenderT=setTimeout(()=>{if(!$('#edModal').hidden||!$('#setModal').hidden||!$('#obModal').hidden||!$('#hModal').hidden){softRender();return}renderAll()},250)}
 const store={
   chain:Promise.resolve(),lastPull:0,hadUser:false,pullListeners:false,
   monthKey(ts){const d=new Date(ts);return 'm-'+d.getFullYear()+'-'+pad(d.getMonth()+1)},
@@ -608,6 +683,47 @@ const store={
     Object.keys(it).forEach(k=>{if(it[k]&&(!S.refl[k]||(it[k].u||0)>(S.refl[k].u||0))){S.refl[k]=it[k];ch=true}});
     if(ch)ls.set('fm.refl',S.refl);
     return ch;
+  },
+  habitToRow(h){return{id:h.id,name:h.name,kind:h.kind,target:h.kind==='check'?1:h.target,unit:h.unit||'',days:h.days,focus_tag:h.tag||null,sort:h.sort||0,created_at:new Date(h.created||Date.now()).toISOString(),deleted:!!h.deleted,updated_at:h.u||Date.now()}},
+  rowToHabit(r){return{id:r.id,name:r.name,kind:r.kind,target:Number(r.target),unit:r.unit||'',days:r.days,tag:r.focus_tag||null,sort:r.sort||0,created:new Date(r.created_at).getTime(),deleted:!!r.deleted,u:Number(r.updated_at)}},
+  async fetchAll(table){
+    const sb=this.sb();if(!sb)throw new Error('no client');
+    const all=[];let from=0;
+    for(;;){
+      const {data,error}=await sb.from(table).select('*').order('id').range(from,from+999);
+      if(error)throw error;
+      if(data&&data.length)all.push.apply(all,data);
+      if(!data||data.length<1000)break;
+      from+=1000;
+    }
+    return all;
+  },
+  /* habits sync on their own: if it fails, blocks keep syncing as before */
+  async pullHabits(push){
+    if(!this.sb()||!authUser)return false;
+    try{
+      const [hr,lr]=await Promise.all([this.fetchAll('habits'),this.fetchAll('habit_logs')]);
+      let ch=false;const hm=new Map(S.habits.map(h=>[h.id,h]));
+      hr.forEach(r=>{const h=this.rowToHabit(r),l=hm.get(h.id);if(!l||h.u>(l.u||0)){hm.set(h.id,h);ch=true}});
+      S.habits=Array.from(hm.values());
+      lr.forEach(r=>{const k=r.habit_id+'_'+r.day,u=Number(r.updated_at),l=S.hlogs[k];if(!l||u>(l.u||0)){S.hlogs[k]={h:r.habit_id,d:r.day,v:Number(r.value),u};ch=true}});
+      if(ch)persistHabits();
+      if(push){
+        const rh=new Map(hr.map(r=>[r.id,Number(r.updated_at)])),rl=new Map(lr.map(r=>[r.id,Number(r.updated_at)]));
+        this.saveHabits(S.habits.filter(h=>!rh.has(h.id)||(h.u||0)>rh.get(h.id)).map(h=>h.id),Object.keys(S.hlogs).filter(k=>!rl.has(k)||(S.hlogs[k].u||0)>rl.get(k)));
+      }
+      return ch;
+    }catch(e){console.warn('Habit sync unavailable:',e&&e.message);return false}
+  },
+  saveHabits(hids,lids){
+    const sb=this.sb();if(!sb||!authUser||!((hids&&hids.length)||(lids&&lids.length)))return;
+    this.chain=this.chain.then(async()=>{
+      const hs=(hids||[]).map(findH).filter(Boolean).map(h=>this.habitToRow(h));
+      for(let i=0;i<hs.length;i+=500){const {error}=await sb.from('habits').upsert(hs.slice(i,i+500),{onConflict:'id'});if(error)throw error}
+      const known=new Set(S.habits.map(h=>h.id));
+      const lg=(lids||[]).filter(k=>S.hlogs[k]&&known.has(S.hlogs[k].h)).map(k=>({id:k,habit_id:S.hlogs[k].h,day:S.hlogs[k].d,value:S.hlogs[k].v,updated_at:S.hlogs[k].u}));
+      for(let i=0;i<lg.length;i+=500){const {error}=await sb.from('habit_logs').upsert(lg.slice(i,i+500),{onConflict:'id'});if(error)throw error}
+    }).catch(e=>console.warn('Habit save failed, will retry on next sync:',e&&e.message));
   },
   async fetchAllBlocks(){
     const sb=this.sb();if(!sb)throw new Error('no client');
@@ -648,12 +764,13 @@ const store={
         this.pushLocalDelta(rows,remoteRefl,remoteSettingsU);
       }
       if(ch){persistLocal();softRender()}
+      if(await this.pullHabits(push))softRender();
       this.ok();
     }catch(e){this.fail(e);throw e}
   },
   tryPull(){this.pull(false).catch(()=>{})},
   clearLocalForSignOut(){
-    S.sessions=[];S.settings=Object.assign({},defaults);S.refl={};S.del={};
+    S.sessions=[];S.settings=Object.assign({},defaults);S.refl={};S.del={};S.habits=[];S.hlogs={};persistHabits();
     ls.set('fm.sessions',[]);ls.set('fm.settings2',S.settings);ls.set('fm.refl',{});ls.set('fm.del',{});
     localStorage.removeItem('fm.owner');
     this.signedOut();renderAll();
@@ -662,7 +779,7 @@ const store={
     const owner=ls.get('fm.owner','')||'';
     const switched=!!(owner&&owner!==userId);
     if(switched){
-      S.sessions=[];S.settings=Object.assign({},defaults);S.refl={};S.del={};
+      S.sessions=[];S.settings=Object.assign({},defaults);S.refl={};S.del={};S.habits=[];S.hlogs={};persistHabits();
       persistLocal();ls.set('fm.refl',{});ls.set('fm.del',{});
     }
     await this.pull(true,!switched);
@@ -1091,6 +1208,129 @@ document.addEventListener('pointermove',e=>{const t=e.target&&e.target.closest?e
 document.addEventListener('pointerdown',e=>{if(!(e.target.closest&&e.target.closest('[data-tip]')))tipEl.classList.remove('show')});
 document.addEventListener('scroll',()=>tipEl.classList.remove('show'),{passive:true});
 
+/* habits: what you do every day, and where you slack
+   kinds: check (done or not), count (reach a daily number), focus (filled in from timer blocks)
+   days: weekday bitmask Mon=1 ... Sun=64. Unscheduled days never count as misses. */
+const WD=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],WDL=['Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays','Sundays'];
+const wdi=ts=>(new Date(ts).getDay()+6)%7;
+const sod=ts=>{const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()};
+const habitsLive=()=>S.habits.filter(h=>!h.deleted).sort((a,b)=>(a.sort||0)-(b.sort||0)||(a.created||0)-(b.created||0));
+const findH=id=>S.habits.find(h=>h.id===id);
+const isSched=(h,ts)=>!!(h.days&(1<<wdi(ts)))&&sod(ts)>=sod(h.created||0);
+const hTarget=h=>h.kind==='check'?1:h.target;
+const stepOf=h=>h.target<=10?1:h.target<=60?5:10;
+const fmtAmt=(h,v)=>h.kind==='focus'?fmtDur(v):(Math.round(v*100)/100)+(h.unit?' '+esc(h.unit):'');
+const HSUG=[{name:'Deep work',kind:'focus',target:180,days:31},{name:'Gym',kind:'check',days:21},{name:'Read',kind:'count',target:30,unit:'min',days:127},{name:'Water',kind:'count',target:8,unit:'glasses',days:127},{name:'No phone before 9',kind:'check',days:127}];
+let focusCache=null;
+function focusMin(k,tag){
+  if(!focusCache){focusCache={};S.sessions.forEach(s=>{const d=dayKey(s.start),o=focusCache[d]||(focusCache[d]={'':0});o['']+=s.actual;if(s.tag)o[s.tag]=(o[s.tag]||0)+s.actual})}
+  const o=focusCache[k];let m=o?(tag?o[tag]||0:o['']):0;
+  const r=S.run;if(k===dayKey(Date.now())&&r&&r.phase==='focus'&&(!tag||r.tag===tag))m+=liveMin();
+  return m}
+function hVal(h,k){return h.kind==='focus'?focusMin(k,h.tag):((S.hlogs[h.id+'_'+k]||{}).v||0)}
+/* off: not scheduled, extra: done on an unscheduled day, open: today and not done yet */
+function hState(h,ts){
+  const t0=sod(Date.now()),d=sod(ts);if(d>t0)return 'future';
+  const v=hVal(h,dayKey(d)),done=v>=hTarget(h);
+  if(!isSched(h,d))return done?'extra':'off';
+  if(done)return 'done';
+  if(d===t0)return v>0?'partopen':'open';
+  return v>0?'part':'miss'}
+function hStats(h,days){
+  const t0=sod(Date.now());let sched=0,done=0,cur=0,last=null;
+  for(let i=0;i<days;i++){const st=hState(h,addDays(t0,-i));if(st==='done'){sched++;done++}else if(st==='miss'||st==='part')sched++}
+  for(let i=0;i<730;i++){const ts=addDays(t0,-i);if(ts<sod(h.created||0))break;const st=hState(h,ts);if(st==='done')cur++;else if(st==='miss'||st==='part')break}
+  for(let i=0;i<400;i++){const st=hState(h,addDays(t0,-i));if(st==='done'||st==='extra'){last=i;break}}
+  return {sched,done,rate:sched?done/sched:null,cur,last}}
+const agoTxt=n=>n==null?'never':n===0?'today':n===1?'yesterday':n+' days ago';
+function persistHabits(){ls.set('fm.habits',S.habits);ls.set('fm.hlogs',S.hlogs)}
+function saveHabit(h){h.u=Date.now();const i=S.habits.findIndex(x=>x.id===h.id);if(i>=0)S.habits[i]=h;else S.habits.push(h);persistHabits();store.saveHabits([h.id],[])}
+function setLog(h,k,v){v=clamp(Math.round((+v||0)*100)/100,0,100000);const id=h.id+'_'+k;S.hlogs[id]={h:h.id,d:k,v,u:Date.now()};persistHabits();store.saveHabits([],[id])}
+
+function renderHabits(){
+  focusCache=null;const H=habitsLive(),now=Date.now(),k=dayKey(now);
+  $('#hTodayTitle').textContent='Today, '+new Date(now).toLocaleDateString([],{weekday:'long',day:'numeric',month:'short'});
+  $('#hGridCard').hidden=$('#hSlackCard').hidden=!H.length;
+  if(!H.length){$('#hTodaySum').textContent='';
+    $('#hToday').innerHTML='<p class="muted" style="margin:0 0 10px">Add the things you want to do every day. Each one gets a daily check, a streak and a hit rate, so you can see exactly where you slack. Start from one of these or make your own:</p><div class="tags">'+HSUG.map((s,i)=>'<button data-hsug="'+i+'">+ '+esc(s.name)+(s.kind==='focus'?' '+fmtGoal(s.target)+' (from timer)':s.kind==='count'?' '+s.target+' '+s.unit:'')+'</button>').join('')+'</div>';return}
+  const today=H.filter(h=>isSched(h,now)),rest=H.filter(h=>!isSched(h,now)),nDone=today.filter(h=>hVal(h,k)>=hTarget(h)).length;
+  $('#hTodaySum').textContent=today.length?nDone+' of '+today.length+' done':'Nothing scheduled today';
+  let html=today.map(h=>habitRow(h,k)).join('');
+  if(!today.length)html='<p class="muted" style="margin:0">No habits are scheduled for today.</p>';
+  if(rest.length)html+='<p class="hint" style="margin:10px 0 0">Not scheduled today: '+rest.map(h=>'<button class="linkish" data-hedit="'+h.id+'">'+esc(h.name)+'</button>').join(', ')+'</p>';
+  $('#hToday').innerHTML=html;
+  renderHGrid(H);renderHSlack(H);
+}
+function habitRow(h,k){
+  const v=hVal(h,k),t=hTarget(h),done=v>=t,st=hStats(h,30);let ctl;
+  if(h.kind==='check')ctl='<button class="hchk'+(done?' on':'')+'" data-htog="'+h.id+'" aria-pressed="'+done+'" aria-label="'+esc(h.name)+' done today">'+(done?'✓':'')+'</button>';
+  else if(h.kind==='count')ctl='<div class="hcount"><button data-hstep="'+h.id+'" data-d="-1" aria-label="Less '+esc(h.name)+'">−</button><input type="number" inputmode="decimal" min="0" step="any" data-hval="'+h.id+'" value="'+(v||'')+'" placeholder="0" aria-label="'+esc(h.name)+' today"><button data-hstep="'+h.id+'" data-d="1" aria-label="More '+esc(h.name)+'">+</button></div>';
+  else ctl='<span class="hauto" title="Filled in from your timer" aria-hidden="true">'+(done?'✓':'')+'</span>';
+  const meta=[st.cur?st.cur+' day streak':'',st.rate!=null?Math.round(st.rate*100)+'% in the last 30 days':''].filter(Boolean).join(' · ');
+  return '<div class="hrow'+(done?' done':'')+'">'+ctl+'<div class="hmain"><div class="hline"><button class="hname" data-hedit="'+h.id+'">'+esc(h.name)+'</button>'+(h.kind==='focus'?'<span class="pill">from timer'+(h.tag&&tagOf(h.tag)?': '+esc(tagName(h.tag)):'')+'</span>':'')+(done?'<span class="pill ok">Done</span>':'')+'</div>'
+    +'<div class="hmeta">'+(h.kind==='check'?'':'<span class="hamt">'+fmtAmt(h,v)+' / '+fmtAmt(h,t)+'</span>')+(meta?'<span>'+meta+'</span>':'')+'</div>'
+    +(h.kind==='check'?'':'<div class="hbar"><span style="width:'+(clamp(v/t,0,1)*100).toFixed(1)+'%"></span></div>')+'</div></div>'}
+const HLBL={done:'Done',extra:'Done (not a scheduled day)',miss:'Missed',part:'Partly done',open:'Not done yet',partopen:'In progress',off:'Not scheduled',future:''};
+function renderHGrid(H){
+  const host=$('#hGrid'),W=host.clientWidth||700,n=W>=600?28:W>=420?14:7,t0=sod(Date.now()),days=[];for(let i=n-1;i>=0;i--)days.push(addDays(t0,-i));
+  $('#hGridTitle').textContent=n===28?'Last 4 weeks':n===14?'Last 2 weeks':'Last 7 days';
+  let g='<div class="hgrid" style="grid-template-columns:minmax(64px,'+(n===7?'110px':'150px')+') repeat('+n+',minmax(0,'+(n===7?'40px':'1fr')+'))"><span></span>'+days.map(d=>'<span class="hd'+(d===t0?' t':'')+'">'+WD[wdi(d)].slice(0,1)+'<b>'+new Date(d).getDate()+'</b></span>').join('');
+  H.forEach(hb=>{g+='<button class="hgname" data-hedit="'+hb.id+'" title="'+esc(hb.name)+'">'+esc(hb.name)+'</button>';
+    days.forEach(d=>{const st=hState(hb,d),k=dayKey(d),v=hVal(hb,k),glyph=st==='done'||st==='extra'?'✓':st==='miss'?'×':'';
+      const tip=fmtDay(d)+' · '+esc(hb.name)+'\n'+HLBL[st]+(hb.kind!=='check'&&v?': '+fmtAmt(hb,v)+' of '+fmtAmt(hb,hTarget(hb)):'')+(hb.kind==='focus'?' (from timer)':'');
+      const click=hb.kind!=='focus'&&st!=='future',tag=click?'button':'span';
+      g+='<'+tag+' class="hc s-'+st+'"'+(click?' data-hcell="'+hb.id+'" data-k="'+k+'"':'')+' data-tip="'+tip+'" aria-label="'+tip.replace('\n',': ')+'">'+glyph+'</'+tag+'>'})});
+  host.innerHTML=g+'</div>';
+  $('#hLegend').innerHTML='<span><i class="hc s-done">✓</i>done</span><span><i class="hc s-part"></i>partly</span><span><i class="hc s-miss">×</i>missed</span><span><i class="hc s-open"></i>today, not yet</span><span><i class="hc s-off"></i>not scheduled</span>';
+}
+function renderHSlack(H){
+  const t0=sod(Date.now()),wd=Array.from({length:7},()=>({s:0,d:0})),a={s:0,d:0},b={s:0,d:0};
+  for(let i=1;i<=60;i++){const ts=addDays(t0,-i),o=i<=30?a:b;H.forEach(h=>{const st=hState(h,ts),hit=st==='done',due=hit||st==='miss'||st==='part';if(!due)return;o.s++;if(hit)o.d++;if(i<=56){wd[wdi(ts)].s++;if(hit)wd[wdi(ts)].d++}})}
+  const rows=H.map(h=>({h,s:hStats(h,30)})).filter(x=>x.s.sched>0).sort((x,y)=>x.s.rate-y.s.rate||y.s.sched-x.s.sched);
+  if(!rows.length&&!a.s){$('#hSlack').innerHTML='<p class="muted">Check back after a few days of tracking. This shows which habits and which weekdays you miss most.</p>';return}
+  const facts=[],pct=x=>Math.round(x*100)+'%';
+  if(a.s){let t='<b>'+pct(a.d/a.s)+' of scheduled habits done</b> in the last 30 days ('+a.d+' of '+a.s+').';if(b.s){const dp=Math.round((a.d/a.s-b.d/b.s)*100);t+=dp===0?' Same as the 30 days before.':' <span class="'+(dp>0?'up':'down')+'">'+(dp>0?'Up ':'Down ')+Math.abs(dp)+' points</span> from the 30 days before.'}facts.push(t)}
+  const wr=wd.map((x,i)=>({i,s:x.s,r:x.s?x.d/x.s:null})).filter(x=>x.s>=3).sort((x,y)=>x.r-y.r);
+  if(wr.length>=2&&wr[wr.length-1].r-wr[0].r>=0.1)facts.push('You slack most on <b>'+WDL[wr[0].i]+'</b>: '+pct(wr[0].r)+' done, versus '+pct(wr[wr.length-1].r)+' on '+WDL[wr[wr.length-1].i]+'.');
+  const worst=rows[0];if(worst&&worst.s.rate<0.8)facts.push('Your weakest habit is <b>'+esc(worst.h.name)+'</b>: done '+worst.s.done+' of '+worst.s.sched+' scheduled days. Last done '+agoTxt(worst.s.last)+'.');
+  let h=(facts.length?'<ul class="hfacts">'+facts.map(f=>'<li>'+f+'</li>').join('')+'</ul>':'');
+  h+='<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Habit</th><th>Done</th><th>Hit rate</th><th>Streak</th><th>Last done</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><button class="linkish" data-hedit="'+x.h.id+'">'+esc(x.h.name)+'</button></td><td class="n">'+x.s.done+' / '+x.s.sched+'</td><td><div class="rate"><span class="bt"><span style="width:'+(x.s.rate*100).toFixed(0)+'%"></span></span><b>'+pct(x.s.rate)+'</b></div></td><td class="n">'+(x.s.cur?x.s.cur+' day'+(x.s.cur===1?'':'s'):'–')+'</td><td class="n">'+agoTxt(x.s.last)+'</td></tr>').join('')+'</tbody></table></div>';
+  $('#hSlack').innerHTML=h;
+}
+function toggleDay(id,k){const h=findH(id);if(!h||h.kind==='focus')return;const v=hVal(h,k),t=hTarget(h);setLog(h,k,v>=t?0:t);renderHabits()}
+function stepCount(id,d){const h=findH(id);if(!h)return;const k=dayKey(Date.now());setLog(h,k,Math.max(0,hVal(h,k)+d*stepOf(h)));renderHabits()}
+
+/* habit editor */
+let HM={id:null,kind:'check',days:127,tag:null};
+function openHabit(id,preset){
+  const h=id?findH(id):null,p=preset||{};
+  HM={id:h?h.id:null,kind:h?h.kind:p.kind||'check',days:h?h.days:p.days||127,tag:h?h.tag:null};
+  $('#hmTitle').textContent=h?'Edit habit':'New habit';
+  $('#hmName').value=h?h.name:p.name||'';
+  $('#hmTarget').value=h&&h.kind==='count'?h.target:p.kind==='count'?p.target:'';
+  $('#hmUnit').value=h&&h.kind==='count'?h.unit:p.unit||'';
+  $('#hmHours').value=h&&h.kind==='focus'?h.target/60:p.kind==='focus'?p.target/60:'';
+  $('#hmDel').hidden=!h;$('#hmErr').hidden=true;renderHM();$('#hModal').hidden=false;setTimeout(()=>$('#hmName').focus(),30)}
+function renderHM(){
+  $$('#hmKind button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.k===HM.kind)));
+  $('#hmCountF').hidden=HM.kind!=='count';$('#hmFocusF').hidden=HM.kind!=='focus';
+  $('#hmKindHint').textContent={check:'Tick it off each day.',count:'Done when you reach a daily number, like 30 min of reading or 8 glasses of water.',focus:'Filled in automatically from your timer blocks. Nothing to tick.'}[HM.kind];
+  $('#hmDays').innerHTML=WD.map((n,i)=>'<button data-bit="'+(1<<i)+'" aria-pressed="'+!!(HM.days&(1<<i))+'">'+n+'</button>').join('');
+  $('#hmTags').innerHTML='<button data-ht="" aria-pressed="'+(!HM.tag)+'">Any block</button>'+S.settings.tags.map(t=>'<button data-ht="'+t.id+'" aria-pressed="'+(HM.tag===t.id)+'"><span class="dot" style="background:'+t.color+'"></span>'+esc(t.name)+'</button>').join('')}
+function closeHM(){$('#hModal').hidden=true}
+function saveHM(){
+  const name=$('#hmName').value.trim(),fail=m=>{const e=$('#hmErr');e.textContent=m;e.hidden=false};
+  if(!name)return fail('Give the habit a name.');
+  if(!HM.days)return fail('Pick at least one day.');
+  let target=1,unit='';
+  if(HM.kind==='count'){target=parseFloat($('#hmTarget').value);unit=$('#hmUnit').value.trim().slice(0,20);if(!(target>0&&target<=100000))return fail('Set a daily target above 0.')}
+  if(HM.kind==='focus'){const hrs=parseFloat($('#hmHours').value);if(!(hrs>0&&hrs<=16))return fail('Set the focus hours per day, up to 16.');target=Math.round(hrs*60)}
+  const old=HM.id?findH(HM.id):null;
+  const h=Object.assign(old||{id:uid(),created:Date.now(),deleted:false,sort:habitsLive().length},{name:name.slice(0,60),kind:HM.kind,target,unit,days:HM.days,tag:HM.kind==='focus'?HM.tag||null:null});
+  saveHabit(h);closeHM();renderHabits();toast(old?'Habit updated':'Habit added')}
+function deleteHM(){const h=findH(HM.id);if(!h)return;h.deleted=true;saveHabit(h);closeHM();renderHabits();
+  toast('Habit deleted','Undo',()=>{h.deleted=false;saveHabit(h);renderHabits();toast('Habit restored')})}
+
 /* account (Supabase auth + sync) */
 const SUPABASE_URL='https://tdgufuwotovstrkbllwm.supabase.co';
 const SUPABASE_KEY='sb_publishable_9DKBpd2B0d31DFNTAP1rUw_NuKuOhn5';
@@ -1205,7 +1445,7 @@ function renderWkBanner(){
   const b=$('#wkBanner');if(isDemo()){b.hidden=true;return}
   const r=wkRange('last'),W=S.sessions.filter(s=>s.start>=r.from&&s.start<r.to);
   if(!W.length||S.settings.reviewSeen===r.key){b.hidden=true;return}
-  b.hidden=false;$('#wkBannerTxt').innerHTML='<b>Last week: '+fmtDur(W.reduce((a,s)=>a+s.actual,0))+' in '+W.length+' blocks.</b> Your week in review is ready.';
+  b.hidden=false;$('#wkBannerTxt').innerHTML='<b>Last week: '+fmtDur(W.reduce((a,s)=>a+s.actual,0))+' in '+W.length+' blocks.</b> See how it went, day by day.';
 }
 
 /* focus view */
@@ -1218,7 +1458,7 @@ function announce(t){const l=$('#live');l.textContent='';setTimeout(()=>{l.textC
 
 /* backup */
 async function downloadBackup(){
-  const data=JSON.stringify({app:'flowmeter',version:1,exported:new Date().toISOString(),sessions:S.sessions,settings:S.settings,reflections:S.refl});
+  const data=JSON.stringify({app:'flowmeter',version:1,exported:new Date().toISOString(),sessions:S.sessions,settings:S.settings,reflections:S.refl,habits:S.habits,habitLogs:S.hlogs});
   if(!window.claude){saveFile('flowmeter-backup-'+dayKey(Date.now())+'.json',data,'application/json');toast('Backup saved');return}
   try{const dl=window.claude&&await window.claude.use('downloads');if(dl){await dl.save({filename:'flowmeter-backup-'+dayKey(Date.now())+'.json',data});toast('Backup saved');return}}catch(e){if(e&&e.code==='declined')return}
   try{await navigator.clipboard.writeText(data);toast('Backup copied to clipboard')}catch(e){toast('Backup is unavailable in this view')}
@@ -1233,15 +1473,19 @@ function restoreBackup(file){
     S.sessions=Array.from(map.values()).sort((a,b)=>a.start-b.start);
     if(o.settings&&Array.isArray(o.settings.tags))o.settings.tags.forEach(t=>{if(t&&t.id&&t.name&&!tagOf(t.id))S.settings.tags.push({id:t.id,name:String(t.name).slice(0,24),color:TAG_COLORS.indexOf(inkTag(t.color))>=0?inkTag(t.color):TAG_COLORS[0]})});
     if(o.reflections&&typeof o.reflections==='object')Object.keys(o.reflections).forEach(k=>{const v=o.reflections[k];if(v&&typeof v.t==='string'&&(!S.refl[k]||(v.u||0)>(S.refl[k].u||0)))S.refl[k]=v});
+    const th=[],tl=[];
+    if(Array.isArray(o.habits))o.habits.forEach(x=>{if(!x||typeof x.id!=='string'||typeof x.name!=='string'||['check','count','focus'].indexOf(x.kind)<0)return;const cur=findH(x.id);if(!cur||(x.u||0)>(cur.u||0)){if(cur)Object.assign(cur,x);else S.habits.push(x);th.push(x.id)}});
+    if(o.habitLogs&&typeof o.habitLogs==='object')Object.keys(o.habitLogs).forEach(k=>{const x=o.habitLogs[k];if(!x||typeof x.h!=='string'||typeof x.d!=='string'||typeof x.v!=='number')return;if(!S.hlogs[k]||(x.u||0)>(S.hlogs[k].u||0)){S.hlogs[k]=x;tl.push(k)}});
+    persistHabits();store.saveHabits(th,tl);
     persistLocal();ls.set('fm.refl',S.refl);store.saveBlocks(Array.from(touched));saveSettings();store.saveRefl();
     renderAll();renderSettings();toast('Restored. '+added+' new block'+(added===1?'':'s')+' added.');
   };rd.readAsText(file);
 }
 
 function renderAll(){
-  renderTimer();if(S.tab==='stats')renderStats();
+  renderTimer();if(S.tab==='stats')renderStats();if(S.tab==='habits')renderHabits();
 }
-function setTab(t){S.tab=t;['focus','stats'].forEach(x=>{$('#tab-'+x).hidden=x!==t;$('#t-'+x).setAttribute('aria-selected',String(x===t))});renderAll()}
+function setTab(t){S.tab=t;['focus','habits','stats'].forEach(x=>{$('#tab-'+x).hidden=x!==t;$('#t-'+x).setAttribute('aria-selected',String(x===t))});renderAll()}
 let toastT=0,toastFn=null;function toast(m,label,fn){const t=$('#toast'),b=$('#toastAct');$('#toastMsg').textContent=m;toastFn=fn||null;b.hidden=!fn;b.textContent=label||'';t.classList.toggle('act',!!fn);t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>{t.classList.remove('show','act');toastFn=null},fn?6000:2800)}
 
 function saveFile(name,text,type){const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
@@ -1321,18 +1565,36 @@ $('#sMore').addEventListener('click',()=>{S.sAll=true;renderStats()});
 $('#sHours').addEventListener('click',e=>{const c=e.target.closest('[data-go]');if(!c)return;S.sRange=c.dataset.go;S.sAnchor=+c.dataset.from;S.sAll=false;tipEl.classList.remove('show');renderStats()});
 $('#sWhen').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(b&&!isDemo())openEditor(b.dataset.id)});
 $('#sLog').addEventListener('click',e=>{const d=e.target.closest('[data-edit]');if(d)openEditor(d.dataset.edit)});
+$('#hAdd').addEventListener('click',()=>openHabit(null));
+$('#tab-habits').addEventListener('click',e=>{
+  const c=e.target.closest('[data-hcell]');if(c){toggleDay(c.dataset.hcell,c.dataset.k);return}
+  const ed=e.target.closest('[data-hedit]');if(ed){openHabit(ed.dataset.hedit);return}
+  const tg=e.target.closest('[data-htog]');if(tg){toggleDay(tg.dataset.htog,dayKey(Date.now()));return}
+  const st=e.target.closest('[data-hstep]');if(st){stepCount(st.dataset.hstep,+st.dataset.d);return}
+  const sg=e.target.closest('[data-hsug]');if(sg)openHabit(null,HSUG[+sg.dataset.hsug])});
+$('#tab-habits').addEventListener('change',e=>{const i=e.target.closest('[data-hval]');if(!i)return;const h=findH(i.dataset.hval);if(h){setLog(h,dayKey(Date.now()),parseFloat(i.value)||0);renderHabits()}});
+$('#hmKind').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b){HM.kind=b.dataset.k;renderHM()}});
+$('#hmDays').addEventListener('click',e=>{const b=e.target.closest('[data-bit]');if(b){HM.days^=+b.dataset.bit;renderHM()}});
+$('#hModal').addEventListener('click',e=>{const p=e.target.closest('[data-preset]');if(p){HM.days=+p.dataset.preset;renderHM();return}if(e.target.id==='hModal')closeHM()});
+$('#hmTags').addEventListener('click',e=>{const b=e.target.closest('[data-ht]');if(b){HM.tag=b.dataset.ht||null;renderHM()}});
+$('#hmSave').addEventListener('click',saveHM);
+$('#hmCancel').addEventListener('click',closeHM);
+$('#hmClose').addEventListener('click',closeHM);
+$('#hmDel').addEventListener('click',deleteHM);
+$('#hModal').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();saveHM()}});
 $('#obLen').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){obSel.work=+b.dataset.v;renderOb()}});
 $('#obGoal').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){obSel.goal=+b.dataset.v;renderOb()}});
 $('#obTags').addEventListener('click',e=>{const b=e.target.closest('[data-ob]');if(!b)return;const n=b.dataset.ob;if(obSel.tags.has(n))obSel.tags.delete(n);else obSel.tags.add(n);renderOb()});
 $('#obTagInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim().slice(0,24);if(v){obSel.tags.add(v);e.target.value='';renderOb()}}});
 $('#obNext').addEventListener('click',()=>{if(obStep<3){obStep++;renderOb()}else finishOb()});
 $('#obSkip').addEventListener('click',()=>{S.settings.onboarded=true;saveSettings();$('#obModal').hidden=true;renderAll()});
-let rzT=0;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(S.tab==='stats')renderStats();else if(S.tab==='focus')renderBed()},200)});
+let rzT=0;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(S.tab==='stats')renderStats();else if(S.tab==='habits')renderHabits();else if(S.tab==='focus')renderBed()},200)});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&zen){setZen(false);return}
+  if(e.key==='Escape'&&!$('#hModal').hidden){closeHM();return}
   if(e.key==='Escape'&&!$('#edModal').hidden){closeEditor();return}
   if(e.key==='Escape'&&!$('#setModal').hidden){closeSettings();return}
-  if(!$('#setModal').hidden||!$('#obModal').hidden||!$('#edModal').hidden)return;
+  if(!$('#setModal').hidden||!$('#obModal').hidden||!$('#edModal').hidden||!$('#hModal').hidden)return;
   if(e.metaKey||e.ctrlKey||e.altKey||S.tab!=='focus')return;
   const tg=e.target&&e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||(tg==='BUTTON'&&e.key===' '))return;
   const ph=S.run?S.run.phase:'idle';
