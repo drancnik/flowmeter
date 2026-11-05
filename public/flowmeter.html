@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-dark-32.png" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Flowmeter">
-<meta name="description" content="A calm focus timer that turns your work into ink paintings.">
+<meta name="description" content="A focus timer that logs exactly how much you work, and when.">
 <title>Flowmeter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,15 +19,8 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <filter id="brushEdge" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
-    <filter id="inkSpread" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="8" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="14" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".6"/></filter>
-    <filter id="washBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.4"/></filter>
-  </defs>
-</svg>
 <style>
-/* Layout: an ink scene on the left (the ensō is the timer, ink spreads as you work), controls on the right, today's sheet of brushstrokes below. Gallery and Review are sibling tabs; settings live in a sheet. */
+/* Layout: the timer ring on the left, controls on the right, today's blocks below. Stats is the second tab; settings live in a sheet. */
 :root{
   --paper:#F3EEE3; --ink:#23201D; --indigo:#2F3E5C; --vermilion:#B33A2A; --ochre:#B8863B; --moss:#5E6B4E;
   --bg:#F3EEE3; --surface:#FAF7F0; --sunk:#E7E0D2; --line:#D8CFBE;
@@ -93,25 +86,11 @@ button,input,textarea{font:inherit;color:inherit}
 .scene{background:var(--surface) var(--grain);border-radius:28px;box-shadow:var(--shadow);padding:26px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;overflow:hidden}
 .pot-wrap{position:relative;width:min(320px,78vw);aspect-ratio:1;max-width:100%}
 #scene{width:100%;height:100%;display:block;position:relative;overflow:visible}
-#scene .track{fill:none;stroke:var(--line);stroke-width:1.2;stroke-dasharray:1.5 6;stroke-linecap:round}
-#scene .prog{fill:none;stroke:var(--ph);stroke-width:11;stroke-linecap:round;transition:stroke .8s}
-#scene .prog-wash{fill:none;stroke:var(--ph);stroke-width:22;stroke-linecap:round;opacity:.09;transition:stroke .8s}
-#scene .blot{fill:var(--ink)}
-#scene .blot.w{fill:var(--ph);transition:fill .8s}
-#inkdrop{transition:opacity 6s ease}
-.app[data-phase="break"] #inkdrop,.app[data-phase="breakEnd"] #inkdrop{opacity:.42}
-.app[data-phase="focus"] #inkdrop.live{animation:seep 9s ease-in-out infinite}
-@keyframes seep{0%,100%{opacity:1}50%{opacity:.86}}
-#seal rect{fill:var(--vermilion)}
-#seal path{stroke:var(--surface);fill:none;stroke-width:2.2;stroke-linecap:round}
+#scene .track{fill:none;stroke:var(--sunk);stroke-width:11}
+#scene .prog{fill:none;stroke:var(--ph);stroke-width:11;stroke-linecap:round;transition:stroke .8s,stroke-dashoffset .25s linear}
 .digits{font-weight:300;font-size:clamp(46px,9vw,68px);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.01em;position:relative}
 .dial-label{font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ph);position:relative}
 .dial-sub{font-size:14px;color:var(--muted);position:relative;text-align:center}
-.petals{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.petals i{position:absolute;border-radius:50%;background:var(--ink);opacity:0;transform:scale(0);animation:splash 2.6s cubic-bezier(.2,.8,.3,1) forwards}
-.petals i:nth-child(4n){background:var(--vermilion)}
-.petals i:nth-child(5n){background:var(--ochre)}
-@keyframes splash{0%{transform:scale(0);opacity:.0}12%{opacity:.85}60%{opacity:.5}100%{transform:scale(1);opacity:0}}
 
 .side{display:flex;flex-direction:column;justify-content:center;min-width:0}
 .panel{display:flex;flex-direction:column;gap:18px;min-width:0}
@@ -173,24 +152,15 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .goalbar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--l2),var(--work));transition:width .8s cubic-bezier(.3,1,.4,1)}
 .goalbar.done .fill{background:linear-gradient(90deg,var(--work),var(--bloom))}
 .goalbar b{color:var(--fg);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.garden{width:100%;overflow-x:auto}
-.garden svg{display:block;height:84px}
-.garden .ground{fill:var(--sunk)}
-.stroke{fill:var(--ink)}
-.stroke.wash{filter:url(#washBlur)}
-.seal{fill:var(--vermilion)}
-.dryspot{fill:var(--ink);opacity:.18}
-.new{animation:brushin .9s cubic-bezier(.3,1,.4,1) both;transform-box:fill-box;transform-origin:50% 0}
-@keyframes brushin{from{transform:scaleY(0);opacity:0}to{transform:scaleY(1);opacity:1}}
 
 /* cards, review, garden */
 .stack{display:flex;flex-direction:column;gap:16px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .tile{background:var(--surface) var(--grain);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.tile .v{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
-.tile .k{font-size:13px;color:var(--muted)}
-.tile .mini{height:6px;border-radius:999px;background:var(--sunk);overflow:hidden;margin-top:8px}
-.tile .mini span{display:block;height:100%;background:var(--work);border-radius:999px}
+.tile .v{font-size:26px;font-weight:800;line-height:1.25}
+.tile .s{font-size:12.5px;color:var(--muted);line-height:1.4;margin-top:2px}
+.tile .s b.up{color:var(--good)}.tile .s b.down{color:var(--bloom)}
+.tile .k{font-size:13px;color:var(--muted);font-weight:700}
 .card{background:var(--surface) var(--grain);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .card h3{margin:0;font-family:var(--display);font-weight:600;font-size:22px}
 .bar-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -201,12 +171,31 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .nav span{font-size:13.5px;font-weight:700;min-width:130px;text-align:center}
 .chart{width:100%;overflow-x:auto}
 .chart svg{display:block;max-width:none}
-.chart text,.gview text{fill:var(--muted);font-family:var(--ui);font-weight:600}
+.chart .heat rect{cursor:default}
+.chart text{fill:var(--muted);font-family:var(--ui);font-weight:600}
 .chart text{font-size:11.5px}
-.grid,.gridl{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
-.chart .bar{fill:var(--work)}
+.grid{stroke:var(--line);stroke-width:1;opacity:.7}
+.chart .axis{stroke:var(--l2);stroke-width:1}
+.chart .bar{fill:var(--work);opacity:.78}.chart .bar.cur{opacity:1}
+.chart .col{cursor:default}.chart .col[data-go]{cursor:pointer}.chart .col .hit{fill:transparent}.chart .col:hover .hit{fill:var(--sunk);opacity:.7}.chart .col:hover .bar{opacity:1}
+.chart .val{fill:var(--fg);font-weight:700;font-size:11px}
+.chart .goal{stroke:var(--bloom);stroke-width:1.5;stroke-dasharray:6 4}.chart .goal-t{fill:var(--bloom)!important}
+.chart .lane{fill:var(--sunk);opacity:.6}.chart .blk{cursor:pointer}.chart .blk:hover{opacity:.82}.chart .tot{fill:var(--fg);font-weight:700}
+.chart .lv0{fill:var(--l0)}.chart .lv1{fill:var(--l1)}.chart .lv2{fill:var(--l2)}.chart .lv3{fill:var(--l3)}.chart .lv4{fill:var(--l4)}
+.legend i.lv0{background:var(--l0)}.legend i.lv1{background:var(--l1)}.legend i.lv2{background:var(--l2)}.legend i.lv3{background:var(--l3)}.legend i.lv4{background:var(--l4)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.filters .grow{flex:1 1 0}
+.tip{position:fixed;left:0;top:0;z-index:40;pointer-events:none;background:var(--fg);color:var(--bg);font-size:12.5px;font-weight:600;line-height:1.45;padding:7px 11px;border-radius:10px;white-space:pre-line;max-width:280px;opacity:0;transition:opacity .12s}.tip.show{opacity:1}
+.day-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.blk-row{width:100%;display:grid;grid-template-columns:7.4em 4.8em minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:9px 6px;cursor:pointer;font-size:14px;border-radius:0}
+.blk-row:hover{background:var(--sunk)}.blk-row.live{cursor:default;background:var(--ph-soft)}
+.blk-row .tm{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+.blk-row .dur{font-variant-numeric:tabular-nums;font-weight:800}
+.blk-row .what{display:flex;gap:8px;align-items:center;min-width:0;overflow:hidden;white-space:nowrap}
+.blk-row .what .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.blk-row .nt{color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.pill.now{background:var(--ph);color:var(--bg)}
+@media (max-width:520px){.blk-row{grid-template-columns:6.8em 4.2em minmax(0,1fr)}.blk-row .pill.d{display:none}}
 .t-fg,.chart .barlbl{fill:var(--fg)!important;font-weight:800}
-.flowdot{fill:var(--bloom)}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 @media (max-width:840px){.two{grid-template-columns:minmax(0,1fr)}}
 .split{display:flex;flex-direction:column;gap:12px}
@@ -217,11 +206,6 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .split .r .bt span{display:block;height:100%;border-radius:999px}
 .split .r .v{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
 .split .r .v small{color:var(--muted);font-weight:600;margin-left:6px}
-.facts{display:flex;flex-direction:column;gap:14px;margin:0;padding:0;list-style:none}
-.facts li{display:flex;gap:12px;align-items:flex-start}
-.facts .ic{width:34px;height:34px;border-radius:50%;background:var(--work-soft);display:grid;place-items:center;flex:none;font-weight:800;color:var(--work);font-size:15px}
-.facts b{display:block;font-size:15.5px}
-.facts span{font-size:13.5px;color:var(--muted)}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-weight:700;color:var(--muted);font-size:12.5px;padding:6px 8px;border-bottom:1.5px solid var(--line);white-space:nowrap}
 .tbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -236,27 +220,8 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .demo{background:var(--sunk);border-radius:14px;padding:10px 14px;font-size:14px;color:var(--muted)}
 .eyebrow{font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .muted{font-size:14px;color:var(--muted);margin:0;max-width:70ch}
-.gsum{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:14px;color:var(--muted)}
-.gsum b{color:var(--fg);font-weight:800;font-variant-numeric:tabular-nums}
-.gsum b.up{color:var(--good)}.gsum b.down{color:var(--bloom)}
-.gview{width:100%;overflow-x:auto}
-.gview svg{display:block}
-.gview .soil,.gview .ground{fill:var(--sunk)}
-.gview .span{opacity:.55}
-.gview .cell{fill:var(--bg);stroke:var(--line);stroke-width:1}
-.gview .cell.today{stroke:var(--work);stroke-width:2}
-.gview .cell.out{opacity:.35}
-.gview .colbg{fill:var(--work-soft);opacity:.6}
-.gview .hit{fill:transparent;cursor:pointer}
-.gview .hit:hover{fill:var(--work-soft);opacity:.45}
-.gview .goal{stroke:var(--bloom);stroke-width:1.5;stroke-dasharray:5 5}
-.gview .lv0{fill:var(--l0)}.gview .lv1{fill:var(--l1)}.gview .lv2{fill:var(--l2)}.gview .lv3{fill:var(--l3)}.gview .lv4{fill:var(--l4)}
-.gview .flowring{fill:none;stroke:var(--vermilion);stroke-width:2}
-.gview .grow{animation:fadein .9s ease both}
-@keyframes fadein{from{opacity:0}to{opacity:1}}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:13px;color:var(--muted)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
-.legend .fl{border-radius:2px;background:var(--vermilion)}
 .keys{margin-top:auto;font-size:12.5px;color:var(--muted)}
 
 /* focus view, milestones */
@@ -267,13 +232,6 @@ kbd{font-family:var(--ui);font-size:11.5px;font-weight:700;border:1.5px solid cu
 .app.zen .digits{font-size:clamp(56px,11vw,88px)}
 .zen-ctrl{display:none;gap:10px;margin-top:16px;position:relative;flex-wrap:wrap;justify-content:center}
 .app.zen .zen-ctrl{display:flex}
-.ms{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
-.ms .m{background:var(--bg) var(--grain);border-radius:16px;padding:10px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
-.ms .m svg{width:56px;height:64px}
-.ms .m b{font-size:14px;font-weight:800}
-.ms .m span{font-size:11.5px;color:var(--muted);line-height:1.3}
-.ms .m.locked svg{opacity:.35;filter:grayscale(1)}
-.ms .m.next{outline:2px dashed var(--line);outline-offset:-2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .file-btn{position:relative;overflow:hidden}
 .file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
@@ -306,16 +264,6 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 .err{color:var(--bloom);font-size:13.5px;font-weight:700;margin:0}
 .banner{background:var(--work-soft);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:14.5px}
 .banner p{margin:0;flex:1 1 220px}
-.wk-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
-.wk-stats div{background:var(--bg);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
-.wk-stats b{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
-.wk-stats span{font-size:13px;color:var(--muted)}
-.wk-stats .up{color:var(--good);font-weight:800}
-.wk-stats .down{color:var(--bloom);font-weight:800}
-.notes{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none;max-height:280px;overflow:auto}
-.notes li{display:flex;gap:10px;font-size:14px;align-items:baseline}
-.notes li .d{color:var(--muted);font-size:12.5px;font-weight:700;min-width:3.4em}
-.notes li .dot{width:8px;height:8px;border-radius:50%;flex:none;align-self:center}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .app[data-phase="breakEnd"] .digits{animation:pulse 2s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -326,8 +274,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
     <div class="brand"><span class="mark" aria-hidden="true"></span>Flowmeter</div>
     <nav class="tabs" role="tablist" aria-label="Views">
       <button role="tab" id="t-focus" data-tab="focus" aria-selected="true">Timer</button>
-      <button role="tab" id="t-garden" data-tab="garden" aria-selected="false">Gallery</button>
-      <button role="tab" id="t-review" data-tab="review" aria-selected="false">Review</button>
+      <button role="tab" id="t-stats" data-tab="stats" aria-selected="false">Stats</button>
     </nav>
     <button class="icon-btn" id="setBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </header>
@@ -336,32 +283,22 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
   <section id="tab-focus" class="stack" style="gap:20px">
     <div class="focus-grid">
       <div class="scene">
-        <div class="petals" id="petals"></div>
         <div class="pot-wrap">
           <svg id="scene" viewBox="0 0 240 240" aria-hidden="true">
             <circle class="track" cx="120" cy="120" r="102"/>
-            <g id="inkdrop" class="live" filter="url(#inkSpread)">
-              <g class="ib" data-at="0" data-cx="114" data-cy="122"><circle class="blot w" cx="114" cy="122" r="50" opacity=".16"/></g>
-              <g class="ib" data-at="0.12" data-cx="116" data-cy="120"><circle class="blot" cx="116" cy="120" r="30" opacity=".82"/></g>
-              <g class="ib" data-at="0.42" data-cx="140" data-cy="102"><circle class="blot" cx="140" cy="102" r="15" opacity=".55"/></g>
-              <g class="ib" data-at="0.62" data-cx="96" data-cy="146"><circle class="blot w" cx="96" cy="146" r="20" opacity=".3"/></g>
-              <g class="ib" data-at="0.8" data-cx="132" data-cy="140"><circle class="blot" cx="132" cy="140" r="9" opacity=".9"/></g>
-            </g>
-            <circle class="prog-wash" id="ringWash" cx="120" cy="120" r="102" transform="rotate(-100 120 120)" stroke-dasharray="615.25 640.88" stroke-dashoffset="0" filter="url(#washBlur)"/>
-            <circle class="prog" id="ring" cx="120" cy="120" r="102" transform="rotate(-100 120 120)" stroke-dasharray="615.25 640.88" stroke-dashoffset="0" filter="url(#brushEdge)"/>
-            <g transform="translate(213 213)"><g id="seal" transform="scale(0)"><rect x="-13" y="-13" width="26" height="26" rx="3" filter="url(#brushEdge)"/><path d="M-6 -4 C-2 -8 2 0 6 -4 M-6 4 C-2 0 2 8 6 4"/></g></g>
+            <circle class="prog" id="ring" cx="120" cy="120" r="102" transform="rotate(-90 120 120)" stroke-dasharray="640.88" stroke-dashoffset="640.88"/>
           </svg>
         </div>
         <div class="dial-label" id="dialLabel">Ready</div>
         <div class="digits" id="digits" role="timer" aria-live="off">50:00</div>
         <div class="dial-sub" id="dialSub">Work block</div>
-        <div class="zen-ctrl"><button class="chip-btn" id="zenPause" style="color:var(--fg)">Pause</button><button class="chip-btn" id="zenExit">Exit focus view</button></div>
+        <div class="zen-ctrl"><button class="chip-btn" id="zenPause" style="color:var(--fg)">Pause</button><button class="chip-btn" id="zenStop" style="color:var(--fg)">End block</button><button class="chip-btn" id="zenExit">Exit focus view</button></div>
       </div>
 
       <div class="side">
         <div class="panel" id="pIdle">
-          <div class="banner" id="wkBanner" hidden><p id="wkBannerTxt"></p><button class="chip-btn" id="wkBannerBtn" style="color:var(--fg)">Open review</button></div>
-          <h2 id="idleTitle">Begin your next stroke.</h2>
+          <div class="banner" id="wkBanner" hidden><p id="wkBannerTxt"></p><button class="chip-btn" id="wkBannerBtn" style="color:var(--fg)">See last week</button></div>
+          <h2 id="idleTitle">Ready.</h2>
           <p class="lead" id="idleLead">Pick a length and start.</p>
           <div class="field" id="tagField">
             <span class="lbl">Working on <span class="hint">(optional)</span></span>
@@ -385,9 +322,10 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
         </div>
 
         <div class="panel" id="pFocus" hidden>
-          <span class="eyebrow">Painting</span>
+          <span class="eyebrow" id="focusEyebrow">Working on</span>
           <div class="label-now" id="labelNow"></div>
-          <p class="lead" style="margin:0">Stay with it. The brush moves with every minute you put in.</p>
+          <p class="lead" id="focusLead" style="margin:0"></p>
+          <div class="banner" id="overAsk" hidden><p id="overAskTxt"></p><button class="chip-btn" id="overCap" style="color:var(--fg)"></button></div>
           <div class="row">
             <button class="btn ghost" id="pauseBtn">Pause <kbd>Space</kbd></button>
             <button class="btn ghost" id="plusBtn">+10 min</button>
@@ -400,7 +338,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
 
         <div class="panel" id="pBreak" hidden>
           <span class="eyebrow" id="breakEyebrow">Break</span>
-          <h2 id="breakTitle">The circle is drawn. Rest now.</h2>
+          <h2 id="breakTitle">Block saved. Take a break.</h2>
           <div class="breath"><div class="orb" id="orb"></div><p id="breathText">Breathe in</p></div>
           <div class="field">
             <label class="lbl" for="noteInput">What did you get done? <span class="hint">(optional)</span></label>
@@ -410,7 +348,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
             <span class="lbl">How deep was your focus? <span class="hint">(optional, keys 1 to 5)</span></span>
             <div class="rates" id="rates"></div>
           </div>
-          <button class="btn ghost" id="keepBtn">Still in flow, keep going +10</button>
+          <button class="btn ghost" id="keepBtn">Back to work, same block</button>
           <div class="row">
             <button class="btn ghost" id="skipBreak">Skip break</button>
             <button class="btn ghost" id="doneDay1">Stop for now</button>
@@ -439,68 +377,45 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
     <div class="bed">
       <div class="bed-head" id="bedHead"></div>
       <div class="goalbar" id="dayGoalBar" hidden><div class="track"><div class="fill" id="dayGoalFill"></div></div><b id="dayGoalTxt"></b></div>
-      <div class="garden" id="garden"></div>
+      <div id="bedList"></div>
     </div>
   </section>
 
-  <!-- GARDEN -->
-  <section id="tab-garden" hidden>
+  <!-- STATS -->
+  <section id="tab-stats" hidden>
     <div class="stack">
-      <div class="demo" id="demoGarden" hidden>Example data. Your own blocks replace it after your first one.</div>
-      <div class="card">
-        <div class="bar-head">
-          <h3 id="gTitle">Gallery</h3>
-          <div class="seg" id="gRangeSeg">
-            <button data-g="day" aria-pressed="false">Day</button>
-            <button data-g="week" aria-pressed="true">Week</button>
-            <button data-g="month" aria-pressed="false">Month</button>
-            <button data-g="year" aria-pressed="false">Year</button>
-          </div>
-          <div class="nav"><button id="gPrev" aria-label="Previous">&#8249;</button><span id="gLbl"></span><button id="gNext" aria-label="Next">&#8250;</button></div>
-          <button class="chip-btn" id="gAdd">+ Add time</button>
+      <div class="demo" id="demoStats" hidden>Example data. Your own blocks replace it after your first one.</div>
+      <div class="filters">
+        <div class="seg" id="sRangeSeg">
+          <button data-s="day" aria-pressed="false">Day</button>
+          <button data-s="week" aria-pressed="true">Week</button>
+          <button data-s="month" aria-pressed="false">Month</button>
+          <button data-s="year" aria-pressed="false">Year</button>
         </div>
-        <div class="gsum" id="gSum"></div>
-        <div class="goalbar" id="gGoalBar" hidden><div class="track"><div class="fill" id="gGoalFill"></div></div><b id="gGoalTxt"></b></div>
-        <div class="gview" id="gView"></div>
-        <div class="legend" id="gLegend"></div>
+        <div class="nav"><button id="sPrev" aria-label="Previous period">&#8249;</button><span id="sLbl"></span><button id="sNext" aria-label="Next period">&#8250;</button></div>
+        <button class="chip-btn" id="sNow" hidden>Today</button>
+        <span class="grow"></span>
+        <button class="chip-btn" id="sAdd">+ Add time</button>
+        <button class="chip-btn" id="sExport">Export CSV</button>
       </div>
-      <div class="card"><div class="bar-head"><h3>Milestones</h3><span class="hint" id="msTxt"></span></div><div class="ms" id="msRow"></div></div>
-    </div>
-  </section>
-
-  <!-- REVIEW -->
-  <section id="tab-review" hidden>
-    <div class="stack">
-      <div class="demo" id="demoReview" hidden>Example data. Your own blocks replace it after your first one.</div>
-      <div class="card" id="weekCard">
-        <div class="bar-head"><h3 id="wkTitle">Week in review</h3><div class="seg" id="wkSeg"><button data-wk="last" aria-pressed="true">Last week</button><button data-wk="this" aria-pressed="false">This week</button></div></div>
-        <div class="wk-stats" id="wkStats"></div>
-        <div class="two" style="gap:20px">
-          <div class="stack" style="gap:10px"><span class="lbl">What you got done</span><ul class="notes" id="wkNotes"></ul></div>
-          <div class="stack" style="gap:10px"><label class="lbl" for="reflInput">Reflection <span class="hint">(private, saved automatically)</span></label><textarea id="reflInput" rows="5" maxlength="2000" placeholder="What moved forward? What will you do differently next week?"></textarea></div>
-        </div>
+      <div class="tiles" id="sTiles"></div>
+      <div class="card" id="sHoursCard">
+        <div class="bar-head"><h3 id="sHoursTitle">Hours worked per day</h3><span class="hint">Click a bar to open it.</span></div>
+        <div class="chart" id="sHours"></div>
       </div>
-      <div class="tiles" id="tiles"></div>
       <div class="card">
-        <div class="bar-head">
-          <h3>Hours worked</h3>
-          <div class="seg" id="rangeSeg">
-            <button data-range="week" aria-pressed="true">Week</button>
-            <button data-range="month" aria-pressed="false">Month</button>
-            <button data-range="year" aria-pressed="false">Year</button>
-          </div>
-          <div class="nav"><button id="prevR" aria-label="Previous">&#8249;</button><span id="rangeLbl"></span><button id="nextR" aria-label="Next">&#8250;</button></div>
-        </div>
-        <div class="chart" id="rangeChart"></div>
-        <div class="hint" id="rangeSum"></div>
+        <div class="bar-head"><h3>When you work</h3><span class="hint" id="sWhenHint"></span></div>
+        <div class="chart" id="sWhen"></div>
+        <div class="legend" id="sWhenLegend"></div>
       </div>
       <div class="two">
-        <div class="card"><h3>Where your hours went</h3><div class="split" id="tagSplit"></div></div>
-        <div class="card"><h3>Your patterns</h3><ul class="facts" id="facts"></ul></div>
+        <div class="card"><h3>By hour of day</h3><div class="chart" id="sHourly"></div></div>
+        <div class="card"><h3>By tag</h3><div class="split" id="sTags"></div></div>
       </div>
       <div class="card">
-        <div class="bar-head"><h3>Blocks</h3><button class="chip-btn" id="addBtn">+ Add time</button><button class="chip-btn" id="exportBtn">Export CSV</button></div>
-        <div class="tbl-wrap"><table class="tbl" id="sessTbl"></table></div>
+        <div class="bar-head"><h3>Blocks</h3><span class="hint" id="sLogHint"></span></div>
+        <div class="tbl-wrap"><table class="tbl" id="sLog"></table></div>
+        <div><button class="chip-btn" id="sMore" hidden>Show all</button></div>
       </div>
     </div>
   </section>
@@ -594,7 +509,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
     </div>
     <div id="ob2" class="stack" hidden>
       <h2>Set a daily goal?</h2>
-      <p class="muted">A goal turns hours into a finish line. The day's sheet fills toward it and gets a seal when you reach it.</p>
+      <p class="muted">A goal gives each day a finish line. The progress bar under the timer fills toward it.</p>
       <div class="len" id="obGoal"><button data-v="0">No goal</button><button data-v="60">1h</button><button data-v="120">2h</button><button data-v="180">3h</button><button data-v="240">4h</button><button data-v="360">6h</button></div>
     </div>
     <div id="ob3" class="stack" hidden>
@@ -627,7 +542,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const pad=n=>String(n).padStart(2,'0');
 const dayKey=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
 const parseKey=k=>{const p=k.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]).getTime()};
-const fmtClock=sec=>{sec=Math.max(0,Math.round(sec));const m=Math.floor(sec/60),s=sec%60;return pad(m)+':'+pad(s)};
+const fmtClock=sec=>{sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return h?h+':'+pad(m)+':'+pad(s):pad(m)+':'+pad(s)};
 const fmtDur=min=>{min=Math.round(min);if(min<60)return min+'m';return Math.floor(min/60)+'h '+pad(min%60)+'m'};
 const fmtGoal=min=>min%60===0?(min/60)+'h':fmtDur(min);
 const hm=ts=>{const d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes())};
@@ -642,7 +557,7 @@ const S={
   sessions:ls.get('fm.sessions',[]).map(s=>Object.assign({label:s.label!=null?s.label:(s.action||''),rating:null,tag:null,note:''},s)),
   settings:Object.assign({},defaults,ls.get('fm.settings2',{})),
   run:ls.get('fm.run2',null),
-  refl:ls.get('fm.refl',{}),wkView:'last',tab:'focus',range:'week',rOff:0,justPlanted:null,gRange:'week',gAnchor:Date.now()
+  refl:ls.get('fm.refl',{}),tab:'focus',sRange:'week',sAnchor:Date.now(),sAll:false
 };
 
 /* storage: browser + account, live across devices */
@@ -835,44 +750,37 @@ function syncNoise(){noise(S.settings.noise&&S.run&&S.run.phase==='focus'&&!S.ru
 let wake=null;
 async function holdWake(on){try{if(on&&!wake&&navigator.wakeLock){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}else if(!on&&wake){await wake.release();wake=null}}catch(e){wake=null}}
 
-/* ink scene: the ensō is the timer, ink spreads as you work, a seal marks a finished block */
-const RING=640.88,ENSO=615.25,ring=$('#ring'),ringWash=$('#ringWash'),blots=$$('#inkdrop .ib'),seal=$('#seal');
-let lastG=-1,lastR=-1,bloomAnim=0,bloomUntil=0;
-function setScene(growth,ringFrac,bloom){
-  growth=clamp(growth,0,1);ringFrac=clamp(ringFrac,0,1);bloom=clamp(bloom,0,1);
-  const rk=Math.round(ringFrac*1000);if(rk!==lastR){lastR=rk;const off=(ENSO*(1-ringFrac)).toFixed(2);ring.setAttribute('stroke-dashoffset',off);ringWash.setAttribute('stroke-dashoffset',off);ring.style.opacity=ringFrac<.003?0:1;ringWash.style.opacity=ringFrac<.003?0:''}
-  const gk=Math.round(growth*1000)+'_'+Math.round(bloom*100);if(gk===lastG)return;lastG=gk;
-  blots.forEach(b=>{const at=+b.dataset.at,k=clamp((growth-at)/0.28,0,1),e=1-Math.pow(1-k,2),cx=b.dataset.cx,cy=b.dataset.cy;
-    b.setAttribute('transform','translate('+cx+' '+cy+') scale('+e.toFixed(3)+') translate('+(-cx)+' '+(-cy)+')')});
-  seal.setAttribute('transform','scale('+bloom.toFixed(3)+') rotate('+((1-bloom)*-14).toFixed(1)+')');
-}
-function animateBloom(){const t0=performance.now();bloomUntil=t0+1150;cancelAnimationFrame(bloomAnim);
-  const step=now=>{const t=clamp((now-t0)/700,0,1),k=t<1?1+.6*Math.pow(1-t,3):1;lastG=-1;setScene(1,1,t<.05?0:k);if(t<1)bloomAnim=requestAnimationFrame(step)};
-  bloomAnim=requestAnimationFrame(step)}
-function petalRain(){const box=$('#petals');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;let h='';
-  for(let i=0;i<18;i++){const sz=(6+Math.random()*22).toFixed(0);h+='<i style="left:'+(5+Math.random()*90).toFixed(1)+'%;top:'+(5+Math.random()*80).toFixed(1)+'%;width:'+sz+'px;height:'+sz+'px;animation-delay:'+(Math.random()*1.1).toFixed(2)+'s"></i>'}
-  box.innerHTML=h;setTimeout(()=>{box.innerHTML=''},4200)}
+/* timer ring: one clean circle that fills clockwise from 12 o'clock */
+const RING=640.88,ring=$('#ring');
+let lastR=-1;
+function setRing(f){f=clamp(f,0,1);const rk=Math.round(f*2000);if(rk===lastR)return;lastR=rk;ring.setAttribute('stroke-dashoffset',(RING*(1-f)).toFixed(2));ring.style.opacity=f<.002?0:1}
 
-/* state machine */
+/* state machine
+   A block logs the real time worked: pauses are left out, ending early logs what you did,
+   and when the block time runs out the timer keeps counting (overtime) until you finish. */
 function workedSec(r,now){return (now-r.startedAt-r.pausedTotal-(r.pausedAt?now-r.pausedAt:0))/1000}
+const targetSec=r=>(r.planned+r.ext)*60;
+const LONG_OVER=1800;
+let uiSt=-1,bedMin=-1;
 function todayMin(){const k=dayKey(Date.now());return S.sessions.filter(s=>dayKey(s.start)===k).reduce((a,s)=>a+s.actual,0)}
+function liveMin(){const r=S.run;return r&&r.phase==='focus'?Math.floor(Math.max(0,workedSec(r,Date.now()))/60):0}
 function startWork(){
   audio();const now=Date.now(),st=S.settings;
   if(st.lastEnd&&now-st.lastEnd>CHAIN_GAP*60000){st.sinceLong=0;saveSettings()}
-  S.run={phase:'focus',id:uid(),tag:tagOf(st.lastTag)?st.lastTag:null,planned:st.work,startedAt:now,endsAt:now+st.work*60000,pausedAt:0,pausedTotal:0,ext:0};
+  S.run={phase:'focus',id:uid(),tag:tagOf(st.lastTag)?st.lastTag:null,planned:st.work,startedAt:now,endsAt:now+st.work*60000,pausedAt:0,pausedTotal:0,ext:0,over:false};
   saveRun();holdWake(true);syncNoise();if(st.zenAuto)setZen(true);renderAll();announce(st.work+' minute block started');
 }
 function togglePause(){const r=S.run;if(!r||r.phase!=='focus')return;const now=Date.now();
   if(r.pausedAt){const d=now-r.pausedAt;r.pausedTotal+=d;r.endsAt+=d;r.pausedAt=0}else r.pausedAt=now;
   saveRun();syncNoise();renderAll()}
-function addTen(){const r=S.run;if(!r||r.phase!=='focus')return;r.endsAt+=600000;r.ext+=10;saveRun();renderAll();toast('10 more minutes added')}
-function endWork(early,silent){
+function addTen(){const r=S.run;if(!r||r.phase!=='focus')return;r.endsAt+=600000;r.ext+=10;r.over=false;saveRun();renderAll();toast('10 more minutes added')}
+function endWork(capToPlan){
   const r=S.run;if(!r||r.phase!=='focus')return;const now=Date.now();
   if(r.pausedAt){r.pausedTotal+=now-r.pausedAt;r.pausedAt=0}
-  const actual=early?Math.round(workedSec(r,now)/6)/10:r.planned+r.ext;
-  if(actual<1){S.run=null;saveRun();holdWake(false);syncNoise();renderAll();toast('Under a minute, not logged');return}
-  const before=todayMin(),prev=findS(r.id);
-  const s=Object.assign(prev||{rating:null,note:''},{id:r.id,start:r.startedAt,end:now,label:'',tag:r.tag||null,mode:'manual',planned:r.planned,actual,ext:r.ext,early:!!early,distractions:[],brkPlanned:null,brkActual:null,brkOver:null});
+  const target=targetSec(r),w=workedSec(r,now),sec=capToPlan?Math.min(w,target):w,actual=Math.round(sec/6)/10;
+  if(actual<1){S.run=null;saveRun();holdWake(false);syncNoise();if(zen)setZen(false);renderAll();toast('Under a minute, not logged');return}
+  const before=todayMin(),prev=findS(r.id),end=capToPlan&&w>target?now-(w-target)*1000:now;
+  const s=Object.assign(prev||{rating:null,note:''},{id:r.id,start:r.startedAt,end,label:'',tag:r.tag||null,mode:'manual',planned:r.planned,actual,ext:r.ext,early:sec<target-30,distractions:[],brkPlanned:null,brkActual:null,brkOver:null});
   upsert(s);
   const st=S.settings;if(!r.resumed)st.sinceLong++;st.lastEnd=now;
   let len=st.brk,long=false;
@@ -881,20 +789,15 @@ function endWork(early,silent){
   if(hitGoal)st.goalHit=dayKey(now);
   saveSettings();
   S.run={phase:'break',sid:s.id,len,long,startedAt:now,endsAt:now+len*60000,work:r};
-  S.justPlanted=s.id;
-  saveRun();holdWake(false);syncNoise();renderAll();
-  if(zen)setZen(false);const ms=checkMilestone();announce('Block complete. Break started.');
-  if(!silent){
-    if(ms){chime('goal');animateBloom();petalRain();toast('Milestone: '+ms[0]+' hours painted. '+ms[1]+' unlocked.')}
-    else if(hitGoal){chime('goal');animateBloom();petalRain();toast('Daily goal reached. '+fmtDur(after)+' today.')}
-    else{chime('focus');animateBloom();toast(early?fmtDur(actual)+' of work painted':'Block complete. '+fmtDur(actual)+' painted.')}
-  }
+  saveRun();holdWake(false);syncNoise();if(zen)setZen(false);renderAll();announce('Block saved. Break started.');
+  if(hitGoal){chime('goal');toast('Daily goal reached. '+fmtDur(after)+' today.')}
+  else toast('Block saved: '+fmtDur(actual));
   setTimeout(()=>{const n=$('#noteInput');if(n&&!n.closest('[hidden]'))n.focus({preventScroll:true})},60);
 }
 function keepWorking(){
   const b=S.run;if(!b||b.phase!=='break')return;const r=b.work,now=Date.now();
-  r.pausedTotal+=now-b.startedAt;r.endsAt=now+600000;r.ext+=10;r.resumed=true;r.phase='focus';r.pausedAt=0;
-  S.run=r;saveRun();holdWake(true);syncNoise();renderAll();
+  r.pausedTotal+=now-b.startedAt;r.resumed=true;r.phase='focus';r.pausedAt=0;r.endsAt=now+Math.max(0,targetSec(r)-workedSec(r,now))*1000;
+  S.run=r;saveRun();holdWake(true);syncNoise();renderAll();toast('Back to work. This time is added to the same block.');
 }
 function closeBreak(endDay){
   const b=S.run;if(!b)return;const s=findS(b.sid);if(!s)return;const now=Date.now();
@@ -908,7 +811,7 @@ function toBreakEnd(){const b=S.run;b.phase='breakEnd';saveRun();chime('break');
 function skipBreak(){if(!S.run||S.run.phase!=='break')return;saveNoteFrom('#noteInput');closeBreak(false);startWork()}
 function nextBlock(){if(!S.run||S.run.phase!=='breakEnd')return;saveNoteFrom('#noteInput2');closeBreak(false);startWork()}
 function stopForNow(){if(S.run&&S.run.sid){saveNoteFrom(S.run.phase==='break'?'#noteInput':'#noteInput2')}if(S.run&&(S.run.phase==='break'||S.run.phase==='breakEnd'))closeBreak(true);S.settings.sinceLong=0;saveSettings();S.run=null;saveRun();holdWake(false);renderAll();toast('Saved. See you next block.')}
-function rate(n){const b=S.run;if(!b||!b.sid)return;const s=findS(b.sid);if(!s)return;s.rating=s.rating===n?null:n;upsert(s);renderRates();renderBed();if(s.rating===5)toast('A flow block. Darkest ink.')}
+function rate(n){const b=S.run;if(!b||!b.sid)return;const s=findS(b.sid);if(!s)return;s.rating=s.rating===n?null:n;upsert(s);renderRates();renderBed()}
 function saveNoteFrom(sel){const b=S.run;if(!b||!b.sid)return;const s=findS(b.sid),v=$(sel).value.trim();if(s&&v!==(s.note||'')){s.note=v;upsert(s)}}
 
 /* loop */
@@ -916,15 +819,19 @@ function tick(){
   const r=S.run,now=Date.now();
   if(!r){document.title='Flowmeter';return}
   if(r.phase==='focus'){
-    if(!r.pausedAt&&now>=r.endsAt){endWork(false);return}
-    const rem=(r.pausedAt?r.endsAt-r.pausedAt:r.endsAt-now)/1000,total=(r.planned+r.ext)*60;
-    $('#digits').textContent=fmtClock(rem);setScene(1-rem/total,1-rem/total,0);document.title=(r.pausedAt?'Paused ':'')+fmtClock(rem)+' Flowmeter';
+    const w=workedSec(r,now),target=targetSec(r),over=w>=target,st=over?(w-target>=LONG_OVER?2:1):0;
+    if(over&&!r.over){r.over=true;saveRun();chime('focus');toast('Block time is up. Keep going, overtime counts.');announce('Block time reached. Overtime is counting.')}
+    if(st!==uiSt){renderTimer();return}
+    const txt=over?'+'+fmtClock(w-target):fmtClock(target-w);
+    $('#digits').textContent=txt;setRing(over?1:w/target);document.title=(r.pausedAt?'Paused ':'')+txt+' Flowmeter';
+    if(st===2)$('#overAskTxt').textContent='You are '+fmtDur((w-target)/60)+' past the block time. If you stopped working at the bell, log only the planned time.';
+    if(Math.floor(w/60)!==bedMin)renderBed();
   }else if(r.phase==='break'){
     if(now>=r.endsAt){toBreakEnd();return}
-    const rem=(r.endsAt-now)/1000;$('#digits').textContent=fmtClock(rem);if(performance.now()>bloomUntil)setScene(1,rem/(r.len*60),1);
+    const rem=(r.endsAt-now)/1000;$('#digits').textContent=fmtClock(rem);setRing(rem/(r.len*60));
     $('#breathText').textContent=(now%8000)<4000?'Breathe in':'Breathe out';
     document.title='Break '+fmtClock(rem)+' Flowmeter';
-  }else if(r.phase==='breakEnd'){const o=(now-r.endsAt)/1000;$('#digits').textContent='+'+fmtClock(o);setScene(1,0,1);document.title='Break over. Flowmeter'}
+  }else if(r.phase==='breakEnd'){const o=(now-r.endsAt)/1000;$('#digits').textContent='+'+fmtClock(o);setRing(0);document.title='Break over. Flowmeter'}
 }
 setInterval(tick,250);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();if(S.run&&S.run.phase==='focus'&&!S.run.pausedAt)holdWake(true)}});
@@ -933,9 +840,9 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();if
 function showPanel(id){['pIdle','pFocus','pBreak','pBreakEnd'].forEach(p=>$('#'+p).hidden=p!==id)}
 function setChoice(sel,inputSel,val,div){let hit=false;$$(sel+' button').forEach(b=>{const on=+b.dataset.v===val;if(on)hit=true;b.setAttribute('aria-pressed',String(on))});const inp=inputSel&&$(inputSel);if(inp&&document.activeElement!==inp)inp.value=hit?'':(val?(div?val/div:val):'')}
 function greeting(){const h=new Date().getHours(),m=todayMin(),g=S.settings.dayGoal;
-  if(g&&m>=g)return ['Goal reached today.','Anything more is a bonus. Keep going or rest, both count.'];
-  if(m>0)return ['Keep the ink flowing.',fmtDur(m)+' painted today'+(g?', '+fmtDur(g-m)+' to your goal.':'. One more?')];
-  return [h<12?'Good morning. Begin the first stroke.':h<18?'Make your first stroke today.':'One stroke before the day ends?','Pick a length and start. Stay with it and the circle closes.']}
+  if(g&&m>=g)return ['Daily goal reached.',fmtDur(m)+' worked today. Anything more is extra.'];
+  if(m>0)return ['Ready for the next block?',fmtDur(m)+' worked today'+(g?', '+fmtDur(g-m)+' left to your goal.':'.')];
+  return [h<12?'Good morning.':h<18?'Good afternoon.':'Good evening.','Pick a length and start your first block of the day.']}
 function renderTagChips(){
   const st=S.settings,cur=tagOf(st.lastTag)?st.lastTag:null;
   let h=st.tags.map(t=>'<button data-tag="'+t.id+'" aria-pressed="'+(cur===t.id)+'"><span class="dot" style="background:'+t.color+'"></span>'+esc(t.name)+'</button>').join('');
@@ -944,30 +851,38 @@ function renderTagChips(){
   $('#tagChips').innerHTML=h;
 }
 function renderTimer(){
-  const r=S.run,ph=r?r.phase:'idle',st=S.settings;$('#app').dataset.phase=ph;
-  $('#inkdrop').classList.toggle('live',ph==='focus'&&!(r&&r.pausedAt));
+  const r=S.run,ph=r?r.phase:'idle',st=S.settings;$('#app').dataset.phase=ph;uiSt=-1;
   if(!r){
     showPanel('pIdle');const g=greeting();$('#idleTitle').textContent=g[0];$('#idleLead').textContent=g[1];
     $('#dialLabel').textContent='Ready';$('#digits').textContent=fmtClock(st.work*60);
-    $('#dialSub').textContent=st.work+' min work, '+st.brk+' min break';setScene(0,1,0);
+    $('#dialSub').textContent=st.work+' min work, '+st.brk+' min break';setRing(0);
     setChoice('#workLen','#workCustom',st.work);setChoice('#brkLen','#brkCustom',st.brk);
     if(!document.querySelector('#tagChips input'))renderTagChips();renderWkBanner();
     $('#startBtn').innerHTML='Start '+st.work+' min <kbd>Space</kbd>';
   }else if(ph==='focus'){
-    showPanel('pFocus');$('#dialLabel').textContent=r.pausedAt?'Paused':'Painting';
-    $('#dialSub').textContent=(r.planned+r.ext)+' min block';
+    showPanel('pFocus');const w=workedSec(r,Date.now()),target=targetSec(r),over=w>=target,len=r.planned+r.ext;
+    uiSt=over?(w-target>=LONG_OVER?2:1):0;
+    $('#dialLabel').textContent=r.pausedAt?'Paused':over?'Overtime':'Working';
+    $('#dialSub').textContent=over?len+' min block done, still counting':len+' min block';
+    $('#focusEyebrow').textContent=over?'Overtime':'Working on';
     $('#labelNow').innerHTML=r.tag&&tagOf(r.tag)?'<span class="dot" style="background:'+tagColor(r.tag)+'"></span>'+esc(tagName(r.tag)):'Deep work';
+    $('#focusLead').textContent=over?'Block time is up. Every minute you keep working still counts toward this block. Finish when you stop.':'Pause if you step away, so only real work is counted.';
     $('#pauseBtn').innerHTML=(r.pausedAt?'Resume':'Pause')+' <kbd>Space</kbd>';$('#zenPause').textContent=r.pausedAt?'Resume':'Pause';
+    $('#plusBtn').hidden=over;
+    const sb=$('#stopBtn');sb.textContent=over?'Finish block':'End block now';sb.classList.toggle('ghost',!over);
+    $('#zenStop').textContent=over?'Finish block':'End block';
+    $('#overAsk').hidden=uiSt!==2;if(uiSt===2)$('#overCap').textContent='Log only '+fmtDur(len);
   }else if(ph==='break'){
     showPanel('pBreak');$('#dialLabel').textContent=r.long?'Long break':'Break';
     $('#breakEyebrow').textContent=(r.long?'Long break, ':'Break, ')+r.len+' min';
-    $('#breakTitle').textContent=r.work&&r.work.early?'Good work. Rest now.':'The circle is drawn. Rest now.';
+    const s=findS(r.sid);
+    $('#breakTitle').textContent=s?'Block saved: '+fmtDur(s.actual)+'. Take a break.':'Take a break.';
     $('#dialSub').textContent='Back at '+new Date(r.endsAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     $('#orb').style.animationDelay='-'+(Date.now()%8000)+'ms';
-    const s=findS(r.sid);if(document.activeElement!==$('#noteInput'))$('#noteInput').value=s&&s.note||'';renderRates();
+    if(document.activeElement!==$('#noteInput'))$('#noteInput').value=s&&s.note||'';renderRates();
   }else if(ph==='breakEnd'){showPanel('pBreakEnd');$('#dialLabel').textContent='Break over';$('#dialSub').textContent='Ready when you are';
     const s=findS(r.sid);$('#noteLate').hidden=!!(s&&s.note);if(document.activeElement!==$('#noteInput2'))$('#noteInput2').value='';renderRates()}
-  lastG=-1;lastR=-1;tick();renderBed();renderKeys();
+  lastR=-1;tick();renderBed();
 }
 function renderRates(){
   const b=S.run,s=b&&b.sid?findS(b.sid):null,cur=s?s.rating:null;
@@ -984,43 +899,21 @@ function streak(){
     d.setDate(d.getDate()-1)}
   return n}
 function weekMin(ts){const ws=startOfWeek(ts).getTime(),we=ws+7*DAYMS;return S.sessions.filter(s=>s.start>=ws&&s.start<we).reduce((a,s)=>a+s.actual,0)}
-/* One visual language everywhere:
-   height or length = time worked, on a shared scale
-   ink darkness = focus rating (1 pale ... 5 black); unrated blocks are drawn as an outline
-   red seal = goal reached */
-const INK_OP=r=>r==null?null:[0,.2,.38,.57,.77,.97][Math.round(r)];
-function brushPath(x,base,H,w){
-  const n=v=>v.toFixed(1),top=base-H,my=base-H*.5;w=Math.min(w,Math.max(H*.9,3));
-  return 'M'+n(x-w*.5)+' '+n(top+w*.3)+' Q'+n(x-w*.6)+' '+n(top-w*.25)+' '+n(x+w*.1)+' '+n(top-w*.32)+' Q'+n(x+w*.66)+' '+n(top-w*.08)+' '+n(x+w*.5)+' '+n(top+w*.4)
-    +' L'+n(x+w*.44)+' '+n(my)+' L'+n(x+w*.4)+' '+n(base-w*.35)+' Q'+n(x+w*.36)+' '+n(base)+' '+n(x)+' '+n(base)+' Q'+n(x-w*.38)+' '+n(base)+' '+n(x-w*.42)+' '+n(base-w*.35)+' L'+n(x-w*.46)+' '+n(my)+'Z'}
-function brush(x,base,H,w,op){
-  if(H<=0)return '';const d=brushPath(x,base,H,w);
-  if(op==null)return '<path class="stroke" style="fill:none;stroke:var(--ink);stroke-width:1.3" opacity=".75" filter="url(#brushEdge)" d="'+d+'"/>';
-  return '<path class="stroke wash" opacity="'+(op*.25).toFixed(2)+'" transform="translate(1.4 1)" d="'+d+'"/><path class="stroke" opacity="'+op.toFixed(2)+'" filter="url(#brushEdge)" d="'+d+'"/>'}
-function sealMark(x,y,sz,rot){return '<rect class="seal" x="'+(x-sz/2).toFixed(1)+'" y="'+(y-sz/2).toFixed(1)+'" width="'+sz.toFixed(1)+'" height="'+sz.toFixed(1)+'" rx="'+(sz*.14).toFixed(1)+'" transform="rotate('+(rot||-5)+' '+x.toFixed(1)+' '+y.toFixed(1)+')" filter="url(#brushEdge)"/>'}
-function inkKey(){
-  const sw=(op,lbl)=>'<span style="display:inline-flex;align-items:center;gap:4px"><svg width="12" height="18" viewBox="0 0 12 18" aria-hidden="true">'+brush(6,17,15,7,op)+'</svg>'+lbl+'</span>';
-  return '<span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap">Focus: '+sw(INK_OP(1),'1')+sw(INK_OP(2),'2')+sw(INK_OP(3),'3')+sw(INK_OP(4),'4')+sw(INK_OP(5),'5 flow')+sw(null,'not rated')+'</span>'}
-function sprout(x,base,s,cls){
-  const h=clamp(s.actual*.5,5,66),tc=s.tag&&tagOf(s.tag)?tagColor(s.tag):null;
-  let g='<g class="'+cls+'">'+brush(x,base,h,10,INK_OP(s.rating));
-  if(tc)g+='<rect x="'+(x-9)+'" y="'+(base+5)+'" width="18" height="3" rx="1.5" fill="'+tc+'"/>';
-  return g+'<title>'+hm(s.start)+', '+fmtDur(s.actual)+(s.tag&&tagOf(s.tag)?', '+esc(tagName(s.tag)):'')+(s.note?': '+esc(s.note):'')+(s.rating?', focus '+s.rating:', not rated')+'</title></g>';
-}
+/* today: exact minutes, including the block that is running right now */
+const SPAN=s=>{const a=s.start,b=s.end&&s.end>a?s.end:a+s.actual*60000;return [a,b]};
+function planPill(s){if(s.manual||!s.planned)return '';const d=Math.round(s.actual-(s.planned+(s.ext||0)));
+  if(Math.abs(d)<1)return '';return '<span class="pill d">'+(d>0?'+'+fmtDur(d)+' over':fmtDur(-d)+' under')+'</span>'}
 function renderBed(){
-  const t=todaySessions(),min=t.reduce((a,s)=>a+s.actual,0),flow=t.filter(s=>s.rating===5).length,wk=weekMin(Date.now()),st=streak(),g=S.settings.dayGoal,wg=S.settings.weekGoal;
-  $('#bedHead').innerHTML='<h3>Today’s sheet</h3><span>Worked <b>'+fmtDur(min)+'</b></span><span>Blocks <b>'+t.length+'</b></span><span>Flow blocks <b>'+flow+'</b></span><span>This week <b>'+fmtDur(wk)+(wg?' / '+fmtGoal(wg):'')+'</b></span><span>Streak <b>'+st+' day'+(st===1?'':'s')+'</b></span>';
+  const t=todaySessions(),r=S.run,lm=liveMin(),live=r&&r.phase==='focus';bedMin=lm;
+  const logged=t.reduce((a,s)=>a+s.actual,0),min=logged+lm,wk=weekMin(Date.now())+lm,st=streak(),g=S.settings.dayGoal,wg=S.settings.weekGoal;
+  $('#bedHead').innerHTML='<h3>Today</h3><span>Worked <b>'+fmtDur(min)+'</b></span><span>Blocks <b>'+t.length+'</b></span><span>This week <b>'+fmtDur(wk)+(wg?' / '+fmtGoal(wg):'')+'</b></span><span>Streak <b>'+st+' day'+(st===1?'':'s')+'</b></span>';
   const bar=$('#dayGoalBar');
   if(g){bar.hidden=false;const p=clamp(min/g,0,1);$('#dayGoalFill').style.width=(p*100).toFixed(1)+'%';bar.classList.toggle('done',min>=g);$('#dayGoalTxt').textContent=min>=g?'Goal reached, '+fmtDur(min):fmtDur(min)+' of '+fmtGoal(g)}else bar.hidden=true;
-  if(!t.length){$('#garden').innerHTML='<p class="hint" style="margin:2px 0 0">Every block you finish becomes a brushstroke here: taller means longer, darker ink means deeper focus. When you reach your daily goal, the sheet gets a red seal.</p>';S.justPlanted=null;return}
-  const gap=46,W=Math.max(($('#garden').clientWidth||600)-2,t.length*gap+40),H=88,base=72;
-  let svg='<rect class="ground" x="0" y="'+(base+3)+'" width="'+W+'" height="1.5" rx=".75" style="fill:var(--line)"/>';
-  t.forEach((s,i)=>{svg+=sprout(26+i*gap,base,s,s.id===S.justPlanted?'new':'')});
-  if(g&&min>=g)svg+=sealMark(26+t.length*gap+4,base-12,16,-6);
-  $('#garden').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" role="img" aria-label="Today’s blocks as brushstrokes">'+svg+'</svg>';
-  S.justPlanted=null;
+  const rows=t.map(s=>{const sp=SPAN(s),tg=tagOf(s.tag);
+    return '<li><button class="blk-row" data-edit="'+s.id+'" aria-label="Edit block from '+hm(sp[0])+'"><span class="tm">'+hm(sp[0])+'–'+hm(sp[1])+'</span><span class="dur">'+fmtDur(s.actual)+'</span><span class="what">'+(tg?'<span class="dot" style="background:'+tg.color+'"></span><span>'+esc(tg.name)+'</span>':'')+(s.note?'<span class="nt">'+esc(s.note)+'</span>':'')+'</span>'+planPill(s)+'</button></li>'});
+  if(live){const tg=r.tag&&tagOf(r.tag);rows.push('<li><div class="blk-row live"><span class="tm">'+hm(r.startedAt)+'–now</span><span class="dur">'+fmtDur(lm)+'</span><span class="what">'+(tg?'<span class="dot" style="background:'+tg.color+'"></span><span>'+esc(tg.name)+'</span>':'')+'</span><span class="pill now">'+(r.pausedAt?'Paused':'In progress')+'</span></div></li>')}
+  $('#bedList').innerHTML=rows.length?'<ul class="day-list">'+rows.join('')+'</ul>':'<p class="hint" style="margin:2px 0 0">Each block you work shows up here with its exact start, end and minutes. Click one to fix it.</p>';
 }
-function renderKeys(){}
 
 /* demo */
 let demoCache=null;
@@ -1041,199 +934,162 @@ const data=()=>isDemo()?demo():S.sessions;
 const tagsAll=()=>isDemo()?DEMO_TAGS:S.settings.tags;
 const tagFind=id=>tagsAll().find(t=>t.id===id)||null;
 
-/* garden tab */
-function aggDays(D){const m={};D.forEach(s=>{const k=dayKey(s.start),a=m[k]||(m[k]={h:0,n:0,flow:0,rs:0,rn:0});a.h+=s.actual/60;a.n++;if(s.rating===5)a.flow++;if(s.rating){a.rs+=s.rating;a.rn++}});return m}
-const avgR=a=>a&&a.rn?a.rs/a.rn:null;
-const goalMet=a=>!isDemo()&&S.settings.dayGoal>0&&a&&a.h*60>=S.settings.dayGoal;
-/* one small ink painting: a main stroke sized by hours, more strokes for more work, red seals for flow blocks */
-function gStroke(x,base,H,w,r,met){
-  if(H<=0)return '<ellipse class="dryspot" cx="'+x.toFixed(1)+'" cy="'+(base-1).toFixed(1)+'" rx="3" ry="1.6"/>';
-  return brush(x,base,H,w,INK_OP(r))+(met?sealMark(x+w*.5+9,base-H+4,11,-6):'');
-}
-const level=h=>h<=0?0:h<1?1:h<2.5?2:h<4.5?3:4;
-function gPeriod(){const a=new Date(S.gAnchor);a.setHours(0,0,0,0);
-  if(S.gRange==='day')return {from:a.getTime(),to:a.getTime()+DAYMS};
-  if(S.gRange==='week'){const s=startOfWeek(a),e=new Date(s);e.setDate(s.getDate()+7);return {from:s.getTime(),to:e.getTime()}}
-  if(S.gRange==='month')return {from:new Date(a.getFullYear(),a.getMonth(),1).getTime(),to:new Date(a.getFullYear(),a.getMonth()+1,1).getTime()};
+/* stats tab: one goal, exact numbers for how much you work and when */
+const fmtDay=ts=>new Date(ts).toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'});
+const plusMin=m=>{m=Math.round(m);return m===0?'On plan':(m>0?'+':'−')+fmtDur(Math.abs(m))};
+const addDays=(ts,n)=>{const d=new Date(ts);d.setDate(d.getDate()+n);return d.getTime()};
+function sPeriod(){const a=new Date(S.sAnchor);a.setHours(0,0,0,0);
+  if(S.sRange==='day')return {from:a.getTime(),to:addDays(a,1)};
+  if(S.sRange==='week'){const s=startOfWeek(a).getTime();return {from:s,to:addDays(s,7)}}
+  if(S.sRange==='month')return {from:new Date(a.getFullYear(),a.getMonth(),1).getTime(),to:new Date(a.getFullYear(),a.getMonth()+1,1).getTime()};
   return {from:new Date(a.getFullYear(),0,1).getTime(),to:new Date(a.getFullYear()+1,0,1).getTime()}}
-function gPrevPeriod(p){const a=new Date(p.from);
-  if(S.gRange==='day')return {from:p.from-DAYMS,to:p.from,name:'the day before'};
-  if(S.gRange==='week')return {from:p.from-7*DAYMS,to:p.from,name:'last week'};
-  if(S.gRange==='month')return {from:new Date(a.getFullYear(),a.getMonth()-1,1).getTime(),to:p.from,name:'the month before'};
+function sPrevPeriod(p){const a=new Date(p.from);
+  if(S.sRange==='day')return {from:addDays(p.from,-1),to:p.from,name:'the day before'};
+  if(S.sRange==='week')return {from:addDays(p.from,-7),to:p.from,name:'the week before'};
+  if(S.sRange==='month')return {from:new Date(a.getFullYear(),a.getMonth()-1,1).getTime(),to:p.from,name:'the month before'};
   return {from:new Date(a.getFullYear()-1,0,1).getTime(),to:p.from,name:'the year before'}}
-function gShift(dir){const a=new Date(S.gAnchor);
-  if(S.gRange==='day')a.setDate(a.getDate()+dir);else if(S.gRange==='week')a.setDate(a.getDate()+7*dir);
-  else if(S.gRange==='month'){a.setDate(1);a.setMonth(a.getMonth()+dir)}else{a.setMonth(0,1);a.setFullYear(a.getFullYear()+dir)}
-  S.gAnchor=a.getTime();renderGardenTab()}
-function dayTip(k,a){return new Date(parseKey(k)).toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})+': '+(a?fmtDur(a.h*60)+', '+a.n+' block'+(a.n>1?'s':'')+(a.flow?', '+a.flow+' flow':''):'no work')}
-function gDay(list,W){
-  list=list.slice().sort((a,b)=>a.start-b.start);
-  const d0=new Date(S.gAnchor);d0.setHours(0,0,0,0);const t0=d0.getTime();
-  let h0=7,h1=22;list.forEach(s=>{h0=Math.min(h0,new Date(s.start).getHours());h1=Math.max(h1,Math.ceil((s.start+s.actual*60000-t0)/3600000))});h1=Math.min(Math.max(h1,h0+4),24);
-  const H=260,base=205,pl=18,pr=18,X=ts=>pl+((ts-t0)/3600000-h0)/(h1-h0)*(W-pl-pr);
+function sShift(dir){const a=new Date(S.sAnchor);
+  if(S.sRange==='day')a.setDate(a.getDate()+dir);else if(S.sRange==='week')a.setDate(a.getDate()+7*dir);
+  else if(S.sRange==='month'){a.setDate(1);a.setMonth(a.getMonth()+dir)}else{a.setMonth(0,1);a.setFullYear(a.getFullYear()+dir)}
+  S.sAnchor=a.getTime();S.sAll=false;renderStats()}
+function daysIn(from,to){const out=[];let t=from;while(t<to){out.push(t);t=addDays(t,1)}return out}
+/* spread a block's worked minutes over the clock hours it ran in */
+function slices(s,fn){const sp=SPAN(s),a=sp[0],b=sp[1],len=b-a;if(len<=0)return;let t=a;
+  while(t<b){const h=new Date(t);h.setMinutes(0,0,0);const next=Math.min(b,h.getTime()+3600000);fn(new Date(t),s.actual*(next-t)/len);t=next}}
+function barTop(r,x,y,w,base){r=Math.min(r,w/2,Math.max(0,base-y));const n=v=>v.toFixed(1);
+  return 'M'+n(x)+' '+n(base)+'V'+n(y+r)+'Q'+n(x)+' '+n(y)+' '+n(x+r)+' '+n(y)+'H'+n(x+w-r)+'Q'+n(x+w)+' '+n(y)+' '+n(x+w)+' '+n(y+r)+'V'+n(base)+'Z'}
+/* one bar chart used for hours per day/month and for hours of the day. B: [{m,lbl,tip,cur,go,from,showLbl}] */
+function barChart(B,o){
+  const W=Math.max(300,o.w),H=o.H||230,pl=42,pr=8,pt=24,pb=30,ih=H-pt-pb,maxM=Math.max(o.goal||0,...B.map(b=>b.m)),useMin=maxM<=90;
+  let step,top;
+  if(useMin){step=[5,10,15,30].find(s=>maxM/s<=6)||30;top=Math.max(step,Math.ceil(maxM/step)*step)}
+  else{const mh=maxM/60;step=([.5,1,2,5,10,25,50,100,250].find(s=>mh/s<=6)||500)*60;top=Math.ceil(maxM/step)*step}
+  const Y=m=>pt+ih-(m/top)*ih,tickLbl=v=>useMin?v+'m':(v/60)+'h',bw=(W-pl-pr)/B.length,w=Math.max(2,Math.min(bw-2,bw*.62,44)),gap=bw-w,showVals=bw>=40;
   let g='';
-  for(let h=h0;h<=h1;h++){const x=X(t0+h*3600000).toFixed(1);g+='<line class="gridl" x1="'+x+'" x2="'+x+'" y1="16" y2="'+base+'"/>';if(h1-h0<=12||(h-h0)%2===0)g+='<text x="'+x+'" y="'+(base+30)+'" text-anchor="middle" font-size="11">'+pad(h%24)+':00</text>'}
-  g+='<rect class="ground" x="0" y="'+(base+1)+'" width="'+W+'" height="10" rx="5"/>';
-  list.forEach((s,i)=>{const x1=X(s.start),x2=X(s.start+s.actual*60000),mid=(x1+x2)/2,Hh=clamp(s.actual*1.4,6,180),t=tagFind(s.tag);
-    g+='<rect class="span" x="'+x1.toFixed(1)+'" y="'+(base+1)+'" width="'+Math.max(4,x2-x1).toFixed(1)+'" height="8" rx="4" fill="'+(t?t.color:'var(--sage)')+'"/>';
-    g+='<g class="grow" style="animation-delay:'+i*70+'ms">'+brush(mid,base,Hh,14,INK_OP(s.rating))+'<title>'+hm(s.start)+' to '+hm(s.start+s.actual*60000)+', '+fmtDur(s.actual)+(t?', '+esc(t.name):'')+(s.note?': '+esc(s.note):'')+(s.rating?', focus '+s.rating:'')+'</title></g>'});
-  if(!list.length)g+='<text x="'+(W/2)+'" y="'+(base-70)+'" text-anchor="middle" font-size="15">A blank sheet.</text>';
-  const notes=list.filter(s=>s.note);
-  let extra=notes.length?'<ul class="notes" style="margin-top:10px;max-height:none">'+notes.map(s=>{const t=tagFind(s.tag);return '<li><span class="d">'+hm(s.start)+'</span>'+(t?'<span class="dot" style="background:'+t.color+'"></span>':'')+'<span><b>'+esc(s.note)+'</b> <span class="hint">'+fmtDur(s.actual)+(t?', '+esc(t.name):'')+(s.rating?', focus '+s.rating:'')+'</span></span></li>'}).join('')+'</ul>':'';
-  return {svg:'<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Blocks across the day">'+g+'</svg>'+extra,
-    legend:'<span>Each stroke is one block at the time you worked it. Height = length (the full height is about 2 hours).</span><span>The bar on the line shows when it ran, coloured by tag.</span>'+inkKey()};
+  for(let v=0;v<=top+1e-6;v+=step){const y=Y(v).toFixed(1);g+='<line class="grid" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'"/><text x="'+(pl-8)+'" y="'+(+y+4)+'" text-anchor="end">'+tickLbl(v)+'</text>'}
+  B.forEach((b,i)=>{const x0=pl+i*bw,x=x0+gap/2,y=Y(b.m);
+    g+='<g class="col"'+(b.go?' data-go="'+b.go+'" data-from="'+b.from+'"':'')+' data-tip="'+esc(b.tip)+'"><rect class="hit" x="'+x0.toFixed(1)+'" y="'+pt+'" width="'+bw.toFixed(1)+'" height="'+(ih+pb)+'"/>';
+    if(b.m>0)g+='<path class="bar'+(b.cur?' cur':'')+'" d="'+barTop(4,x,y,w,Y(0))+'"/>';
+    if(b.m>0&&showVals)g+='<text class="val" x="'+(x+w/2).toFixed(1)+'" y="'+(y-6).toFixed(1)+'" text-anchor="middle">'+fmtDur(b.m)+'</text>';
+    if(b.showLbl!==false)g+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-9)+'" text-anchor="middle"'+(b.cur?' class="t-fg"':'')+'>'+b.lbl+'</text>';
+    g+='</g>'});
+  g+='<line class="axis" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(0)+'" y2="'+Y(0)+'"/>';
+  if(o.goal){const y=Y(o.goal).toFixed(1);g+='<line class="goal" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y+'" y2="'+y+'"/><text class="goal-t" x="'+(W-pr)+'" y="'+(+y-6)+'" text-anchor="end">Daily goal '+fmtGoal(o.goal)+'</text>'}
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+esc(o.label)+'">'+g+'</svg>';
 }
-function gWeek(agg,p,W){
-  const H=270,base=200,cw=W/7,tk=dayKey(Date.now()),scale=Math.max(4,(S.settings.dayGoal||0)/60,...Object.values(agg).map(a=>a.h));
-  const hOf=h=>h?clamp(h/scale*175,4,175):0;
-  let g='<rect class="ground" x="0" y="'+base+'" width="'+W+'" height="10" rx="5"/>';
-  if(S.settings.dayGoal&&!isDemo()){const y=base-hOf(S.settings.dayGoal/60);g+='<line class="goal" x1="0" x2="'+W+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'"/><text x="'+(W-4)+'" y="'+(y-5).toFixed(1)+'" text-anchor="end" font-size="11">daily goal</text>'}
-  for(let i=0;i<7;i++){const d=new Date(p.from);d.setDate(d.getDate()+i);const k=dayKey(d),a=agg[k],x=cw*i+cw/2,h=a?a.h:0;
-    if(k===tk)g+='<rect class="colbg" x="'+(cw*i+4).toFixed(1)+'" y="6" width="'+(cw-8).toFixed(1)+'" height="'+(H-12)+'" rx="16"/>';
-    g+='<g class="grow" style="animation-delay:'+i*70+'ms">'+gStroke(x,base,hOf(h),clamp(cw*.2,14,26),avgR(a),goalMet(a))+'</g>';
-    g+='<text x="'+x.toFixed(1)+'" y="'+(base+28)+'" text-anchor="middle" font-size="12"'+(k===tk?' class="t-fg"':'')+'>'+d.toLocaleDateString([],{weekday:'short'})+' '+d.getDate()+'</text>';
-    g+='<text x="'+x.toFixed(1)+'" y="'+(base+48)+'" text-anchor="middle" font-size="13" class="t-fg">'+(h?fmtDur(h*60):'')+'</text>';
-    g+='<rect class="hit" data-day="'+k+'" x="'+(cw*i+4).toFixed(1)+'" y="6" width="'+(cw-8).toFixed(1)+'" height="'+(H-12)+'" rx="16"><title>'+dayTip(k,a)+'. Click to open the day.</title></rect>'}
-  return {svg:'<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Hours per day this week">'+g+'</svg>',
-    legend:'<span>One stroke per day. Height = hours worked.</span>'+(S.settings.dayGoal&&!isDemo()?'<span>Dashed line = daily goal. <i class="fl"></i>Red seal = goal reached.</span>':'')+inkKey()+'<span>Ink shows the average focus of the day. Click a day to see it hour by hour.</span>'};
+function renderStats(){
+  const demoOn=isDemo(),D=data(),now=Date.now();$('#demoStats').hidden=!demoOn;
+  $$('#sRangeSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.s===S.sRange)));
+  const p=sPeriod(),inP=D.filter(s=>s.start>=p.from&&s.start<p.to).sort((a,b)=>a.start-b.start);
+  $('#sNext').disabled=p.to>now;$('#sNow').hidden=p.from<=now&&now<p.to;
+  $('#sNow').textContent={day:'Today',week:'This week',month:'This month',year:'This year'}[S.sRange];
+  const a=new Date(p.from),z=new Date(p.to-1);
+  $('#sLbl').textContent=S.sRange==='day'?a.toLocaleDateString([],{weekday:'long',day:'numeric',month:'long'}):S.sRange==='week'?a.toLocaleDateString([],{day:'numeric',month:'short'})+' – '+z.toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'}):S.sRange==='month'?a.toLocaleDateString([],{month:'long',year:'numeric'}):String(a.getFullYear());
+  if(!demoOn&&S.sRange==='week'){const lw=wkRange('last');if(p.from===lw.from&&S.settings.reviewSeen!==lw.key){S.settings.reviewSeen=lw.key;saveSettings()}}
+  renderSTiles(D,inP,p,demoOn);renderSHours(inP,p,demoOn);renderSWhen(inP,p);renderSHourly(inP);renderSTags(inP);renderSLog(inP,demoOn);
 }
-function gMonth(agg,p,W){
-  const first=new Date(p.from),lead=(first.getDay()+6)%7,days=new Date(first.getFullYear(),first.getMonth()+1,0).getDate(),rows=Math.ceil((lead+days)/7);
-  const cw=W/7,ch=clamp(Math.round(cw*.85),76,112),hd=26,H=hd+rows*ch+4,tk=dayKey(Date.now()),scale=Math.max(4,...Object.values(agg).map(a=>a.h)),goal=S.settings.dayGoal/60;
-  let g='';['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach((n,i)=>{g+='<text x="'+(i*cw+cw/2).toFixed(1)+'" y="16" text-anchor="middle" font-size="12">'+n+'</text>'});
-  for(let i=0;i<days;i++){const c=(lead+i)%7,r=Math.floor((lead+i)/7),d=new Date(first.getFullYear(),first.getMonth(),i+1),k=dayKey(d),a=agg[k],x=c*cw,y=hd+r*ch,future=d.getTime()>Date.now();
-    g+='<rect class="cell'+(k===tk?' today':'')+(future?' out':'')+'" x="'+(x+3).toFixed(1)+'" y="'+(y+3)+'" width="'+(cw-6).toFixed(1)+'" height="'+(ch-6)+'" rx="12"/>';
-    g+='<text x="'+(x+12).toFixed(1)+'" y="'+(y+20)+'" font-size="11"'+(k===tk?' class="t-fg"':'')+'>'+(i+1)+'</text>';
-    if(a)g+='<text x="'+(x+cw-11).toFixed(1)+'" y="'+(y+20)+'" text-anchor="end" font-size="12" class="t-fg">'+f1(a.h)+'h</text>';
-    if(a){const lv=level(a.h),R=Math.min(cw,ch-24)*[0,.13,.19,.26,.33][lv];g+='<circle class="lv'+lv+' grow" cx="'+(x+cw/2).toFixed(1)+'" cy="'+(y+14+(ch-14)/2).toFixed(1)+'" r="'+R.toFixed(1)+'" filter="url(#inkSpread)" style="animation-delay:'+i*18+'ms"/>'}
-    if(goalMet(a))g+=sealMark(x+cw-16,y+ch-15,12,-6);
-    g+='<rect class="hit" data-day="'+k+'" x="'+(x+3).toFixed(1)+'" y="'+(y+3)+'" width="'+(cw-6).toFixed(1)+'" height="'+(ch-6)+'" rx="12"><title>'+dayTip(k,a)+'</title></rect>'}
-  return {svg:'<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Hours per day this month">'+g+'</svg>',
-    legend:'<span>Bigger, darker ink = more hours.</span><span><i style="background:var(--l1)"></i>under 1h</span><span><i style="background:var(--l2)"></i>1 to 2.5h</span><span><i style="background:var(--l3)"></i>2.5 to 4.5h</span><span><i style="background:var(--l4)"></i>4.5h or more</span>'+(S.settings.dayGoal&&!isDemo()?'<span><i class="fl"></i>Red seal = daily goal reached</span>':'')+'<span>Click a day to open it.</span>'};
+function renderSTiles(D,inP,p,demoOn){
+  const now=Date.now(),cur=p.to>now,tot=inP.reduce((x,s)=>x+s.actual,0),byDay={};inP.forEach(s=>{const k=dayKey(s.start);byDay[k]=(byDay[k]||0)+s.actual});
+  const nd=Object.keys(byDay).length,elapsed=Math.max(1,daysIn(p.from,Math.min(p.to,now)).length),T=[];
+  const pv=sPrevPeriod(p),pEnd=cur?Math.min(pv.to,pv.from+(now-p.from)):pv.to,pt=D.filter(s=>s.start>=pv.from&&s.start<pEnd).reduce((x,s)=>x+s.actual,0);
+  let sub='';if(pt>0){const d=Math.round((tot-pt)/pt*100);sub='<b class="'+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d+'%</b> vs '+(cur?'same point ':'')+pv.name+' ('+fmtDur(pt)+')'}else if(tot)sub='Nothing logged '+(cur?'by this point ':'')+pv.name;
+  T.push(['Worked',fmtDur(tot),sub]);
+  if(S.sRange==='day'){
+    if(inP.length){const ends=inP.map(s=>SPAN(s)[1]);T.push(['Started',hm(inP[0].start),'First block of the day']);T.push(['Finished',hm(Math.max(...ends)),'End of the last block'])}
+  }else{
+    T.push(['Days worked',nd+' of '+elapsed,cur?'days so far in this '+S.sRange:'days in this '+S.sRange]);
+    T.push(['Per day worked',nd?fmtDur(tot/nd):'0m','Across all '+elapsed+' days: '+fmtDur(tot/elapsed)+' a day']);
+  }
+  T.push(['Blocks',String(inP.length),inP.length?'Average '+fmtDur(tot/inP.length)+' each':'']);
+  const tb=inP.filter(s=>!s.manual&&s.planned);
+  if(tb.length){const pl=tb.reduce((x,s)=>x+s.planned+(s.ext||0),0),wk=tb.reduce((x,s)=>x+s.actual,0);T.push(['Worked vs planned',plusMin(wk-pl),fmtDur(wk)+' worked, '+fmtDur(pl)+' planned'])}
+  const goal=demoOn?0:S.sRange==='day'?S.settings.dayGoal:S.sRange==='week'?S.settings.weekGoal:0;
+  if(goal)T.push([S.sRange==='day'?'Daily goal':'Weekly goal',Math.round(tot/goal*100)+'%',fmtDur(tot)+' of '+fmtGoal(goal)]);
+  else if(S.sRange!=='day'&&!demoOn&&S.settings.dayGoal){const met=Object.values(byDay).filter(m=>m>=S.settings.dayGoal).length;T.push(['Daily goal met',met+' day'+(met===1?'':'s'),'Goal: '+fmtGoal(S.settings.dayGoal)+' a day'])}
+  const rs=inP.filter(s=>s.rating).map(s=>s.rating);if(rs.length)T.push(['Average focus',mean(rs).toFixed(1)+' / 5',rs.length+' of '+inP.length+' blocks rated']);
+  $('#sTiles').innerHTML=T.map(t=>'<div class="tile"><span class="k">'+t[0]+'</span><span class="v">'+t[1]+'</span>'+(t[2]?'<span class="s">'+t[2]+'</span>':'')+'</div>').join('');
 }
-function gYear(agg,p,W){
-  const y0=new Date(p.from).getFullYear(),start=startOfWeek(new Date(y0,0,1)),cols=Math.ceil((new Date(y0+1,0,1)-start)/(7*DAYMS));
-  const lw=32,gap=3,cs=clamp(Math.floor((W-lw-8)/cols)-gap,10,17),step=cs+gap,top=24,gw=lw+cols*step,GW=Math.max(gw,W);
-  let g='';['Mon','','Wed','','Fri','',''].forEach((n,r)=>{if(n)g+='<text x="0" y="'+(top+r*step+cs-2)+'" font-size="10">'+n+'</text>'});
-  for(let m=0;m<12;m++){const d=new Date(y0,m,1),c=Math.floor((d-start)/(7*DAYMS));g+='<text x="'+(lw+c*step)+'" y="14" font-size="11">'+d.toLocaleDateString([],{month:'short'})+'</text>'}
-  const now=Date.now();
-  for(let c=0;c<cols;c++)for(let r=0;r<7;r++){const d=new Date(start);d.setDate(start.getDate()+c*7+r);if(d.getFullYear()!==y0)continue;
-    const k=dayKey(d),a=agg[k],x=lw+c*step,y=top+r*step,fut=d.getTime()>now;
-    g+='<rect class="lv'+level(a?a.h:0)+'" data-day="'+k+'" x="'+x+'" y="'+y+'" width="'+cs+'" height="'+cs+'" rx="3" style="cursor:pointer'+(fut?';opacity:.45':'')+'"><title>'+dayTip(k,a)+'</title></rect>';
-    if(goalMet(a))g+='<rect class="flowring" x="'+(x+1)+'" y="'+(y+1)+'" width="'+(cs-2)+'" height="'+(cs-2)+'" rx="2.5" pointer-events="none"/>'}
-  const gridB=top+7*step,mt=Array.from({length:12},()=>({h:0,f:0,rs:0,rn:0}));
-  Object.keys(agg).forEach(k=>{const q=k.split('-').map(Number);if(q[0]===y0){const M=mt[q[1]-1];M.h+=agg[k].h;M.f+=agg[k].flow;M.rs+=agg[k].rs;M.rn+=agg[k].rn}});
-  const maxM=Math.max(10,...mt.map(m=>m.h)),mw=GW/12,base=gridB+160;
-  g+='<text x="0" y="'+(gridB+30)+'" font-size="12" class="t-fg">Months</text><rect class="ground" x="0" y="'+base+'" width="'+GW+'" height="10" rx="5"/>';
-  mt.forEach((m,i)=>{const x=mw*i+mw/2;
-    g+='<g class="grow" style="animation-delay:'+i*60+'ms">'+gStroke(x,base,m.h?clamp(m.h/maxM*120,4,120):0,clamp(mw*.22,12,24),avgR(m),false)+'</g>';
-    g+='<text x="'+x.toFixed(1)+'" y="'+(base+28)+'" text-anchor="middle" font-size="11">'+new Date(y0,i,1).toLocaleDateString([],{month:'short'})+'</text>';
-    g+='<text x="'+x.toFixed(1)+'" y="'+(base+45)+'" text-anchor="middle" font-size="12" class="t-fg">'+(m.h?Math.round(m.h)+'h':'')+'</text>';
-    g+='<rect class="hit" data-month="'+y0+'-'+i+'" x="'+(mw*i+3).toFixed(1)+'" y="'+(gridB+40)+'" width="'+(mw-6).toFixed(1)+'" height="'+(base-gridB+12)+'" rx="12"><title>'+new Date(y0,i,1).toLocaleDateString([],{month:'long'})+': '+fmtDur(m.h*60)+'. Click to open the month.</title></rect>'});
-  const H=base+56;
-  return {svg:'<svg viewBox="0 0 '+GW+' '+H+'" width="'+GW+'" height="'+H+'" role="img" aria-label="Every day of the year by hours worked">'+g+'</svg>',
-    legend:'<span>Each square is a day.</span><span><i style="background:var(--l0)"></i>none</span><span><i style="background:var(--l1)"></i>under 1h</span><span><i style="background:var(--l2)"></i>1 to 2.5h</span><span><i style="background:var(--l3)"></i>2.5 to 4.5h</span><span><i style="background:var(--l4)"></i>4.5h or more</span>'+(S.settings.dayGoal&&!isDemo()?'<span><i class="fl"></i>daily goal reached</span>':'')+'<span>Below, one stroke per month: height = hours, ink = average focus.</span>'};
+function renderSHours(inP,p,demoOn){
+  const card=$('#sHoursCard');if(S.sRange==='day'){card.hidden=true;return}card.hidden=false;
+  const host=$('#sHours'),W=(host.clientWidth||700)-2,tk=dayKey(Date.now()),B=[];
+  if(S.sRange==='year'){const y=new Date(p.from).getFullYear(),cm=new Date().getFullYear()===y?new Date().getMonth():-1;
+    for(let m=0;m<12;m++){const a=new Date(y,m,1).getTime(),b=new Date(y,m+1,1).getTime();B.push({from:a,to:b,lbl:new Date(a).toLocaleDateString([],{month:'short'}),name:new Date(a).toLocaleDateString([],{month:'long',year:'numeric'}),go:'month',cur:m===cm})}}
+  else{const ds=daysIn(p.from,p.to),bw=(W-50)/ds.length;ds.forEach((d,i)=>{const dt=new Date(d);
+    B.push({from:d,to:addDays(d,1),lbl:S.sRange==='week'?(bw>=64?dt.toLocaleDateString([],{weekday:'short'})+' '+dt.getDate():dt.toLocaleDateString([],{weekday:'short'})):String(dt.getDate()),name:fmtDay(d),go:'day',cur:dayKey(d)===tk,showLbl:S.sRange==='week'||bw>=18||i%2===0})})}
+  B.forEach(b=>{const ss=inP.filter(s=>s.start>=b.from&&s.start<b.to);b.m=ss.reduce((x,s)=>x+s.actual,0);b.tip=b.name+'\n'+(b.m?fmtDur(b.m)+' in '+ss.length+' block'+(ss.length===1?'':'s'):'No work')});
+  $('#sHoursTitle').textContent=S.sRange==='year'?'Hours worked per month':'Hours worked per day';
+  host.innerHTML=barChart(B,{w:W,goal:S.sRange!=='year'&&!demoOn?S.settings.dayGoal:0,label:$('#sHoursTitle').textContent});
 }
-function renderGardenTab(){
-  $('#demoGarden').hidden=!isDemo();const D=data();
-  $$('#gRangeSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.g===S.gRange)));
-  const p=gPeriod(),inP=D.filter(s=>s.start>=p.from&&s.start<p.to),agg=aggDays(inP);
-  $('#gNext').disabled=p.to>Date.now();
-  const a=new Date(p.from);
-  $('#gLbl').textContent=S.gRange==='day'?a.toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'}):S.gRange==='week'?a.toLocaleDateString([],{day:'numeric',month:'short'})+' to '+new Date(p.to-DAYMS).toLocaleDateString([],{day:'numeric',month:'short'}):S.gRange==='month'?a.toLocaleDateString([],{month:'long',year:'numeric'}):String(a.getFullYear());
-  $('#gTitle').textContent={day:'Your day',week:'Your week',month:'Your month',year:'Your year'}[S.gRange];
-  const tot=inP.reduce((x,s)=>x+s.actual,0),keys=Object.keys(agg),fl=inP.filter(s=>s.rating===5).length,rs=inP.filter(s=>s.rating).map(s=>s.rating);
-  let sum='<span>Worked <b>'+fmtDur(tot)+'</b></span><span>Blocks <b>'+inP.length+'</b></span><span>Flow blocks <b>'+fl+'</b></span>';
-  if(S.gRange==='day'){if(inP.length){const srt=inP.slice().sort((x,y)=>x.start-y.start);sum+='<span>First block <b>'+hm(srt[0].start)+'</b></span><span>Last ended <b>'+hm(srt[srt.length-1].start+srt[srt.length-1].actual*60000)+'</b></span>'}}
-  else{const best=keys.slice().sort((x,y)=>agg[y].h-agg[x].h)[0];sum+='<span>Days worked <b>'+keys.length+'</b></span>'+(best?'<span>Best day <b>'+new Date(parseKey(best)).toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})+', '+fmtDur(agg[best].h*60)+'</b></span>':'')}
-  if(rs.length)sum+='<span>Avg focus <b>'+mean(rs).toFixed(1)+'</b></span>';
-  const pv=gPrevPeriod(p),cur=p.to>Date.now(),pEnd=cur?pv.from+(Date.now()-p.from):pv.to,pt=D.filter(s=>s.start>=pv.from&&s.start<pEnd).reduce((x,s)=>x+s.actual,0);
-  if(pt>0){const d=Math.round((tot-pt)/pt*100);sum+='<span>vs '+(cur?'same point ':'')+pv.name+' <b class="'+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d+'%</b></span>'}
-  $('#gSum').innerHTML=sum;
-  const gb=$('#gGoalBar'),goal=isDemo()?0:S.gRange==='day'?S.settings.dayGoal:S.gRange==='week'?S.settings.weekGoal:0;
-  if(goal){gb.hidden=false;$('#gGoalFill').style.width=(clamp(tot/goal,0,1)*100).toFixed(1)+'%';gb.classList.toggle('done',tot>=goal);$('#gGoalTxt').textContent=(tot>=goal?'Goal reached, ':'')+fmtDur(tot)+' of '+fmtGoal(goal)}else gb.hidden=true;
-  const W=Math.max(S.gRange==='year'?640:520,($('#gView').clientWidth||800)-2);
-  const v=S.gRange==='day'?gDay(inP,W):S.gRange==='week'?gWeek(agg,p,W):S.gRange==='month'?gMonth(agg,p,W):gYear(agg,p,W);
-  $('#gView').innerHTML=v.svg;$('#gLegend').innerHTML=v.legend;renderMilestones();
+function tagsIn(list){const ids=[],seen=new Set();let un=false;list.forEach(s=>{const t=tagFind(s.tag);if(t){if(!seen.has(t.id)){seen.add(t.id);ids.push(t)}}else un=true});
+  return '<span>'+ids.map(t=>'<i style="background:'+t.color+'"></i>'+esc(t.name)).join('</span><span>')+'</span>'+(un?'<span><i style="background:var(--l3)"></i>Untagged</span>':'')}
+function renderSWhen(inP,p){
+  const host=$('#sWhen'),W=Math.max(320,(host.clientWidth||700)-2);
+  if(S.sRange==='year'){renderSHeat(inP,W);return}
+  const days=daysIn(p.from,p.to),byK={},tk=dayKey(Date.now());inP.forEach(s=>{const k=dayKey(s.start);(byK[k]=byK[k]||[]).push(s)});
+  let h0=24,h1=0;inP.forEach(s=>{const sp=SPAN(s),d0=new Date(sp[0]);d0.setHours(0,0,0,0);h0=Math.min(h0,new Date(sp[0]).getHours());h1=Math.max(h1,Math.ceil((sp[1]-d0.getTime())/3600000))});
+  if(h0>=h1){h0=8;h1=18}h1=Math.min(24,Math.max(h1,h0+6));if(h1-h0<6)h0=Math.max(0,h1-6);
+  const lw=S.sRange==='month'?50:S.sRange==='day'?8:70,rw=58,rh=S.sRange==='day'?44:S.sRange==='week'?32:18,top=24,H=top+days.length*rh+4,X=h=>lw+(h-h0)/(h1-h0)*(W-lw-rw);
+  const span=h1-h0,every=span<=8?1:span<=14?2:3;let g='';
+  for(let h=h0;h<=h1;h++){const x=X(h).toFixed(1);g+='<line class="grid" x1="'+x+'" x2="'+x+'" y1="'+(top-4)+'" y2="'+(H-2)+'"/>';if((h-h0)%every===0)g+='<text x="'+x+'" y="14" text-anchor="middle">'+pad(h%24)+':00</text>'}
+  g+='<text x="'+W+'" y="14" text-anchor="end">Total</text>';
+  days.forEach((d,i)=>{const y=top+i*rh,k=dayKey(d),list=byK[k]||[],dt=new Date(d),tot=list.reduce((x,s)=>x+s.actual,0);
+    if(S.sRange!=='day'){const lbl=S.sRange==='month'?dt.toLocaleDateString([],{weekday:'short'}).slice(0,2)+' '+dt.getDate():dt.toLocaleDateString([],{weekday:'short'})+' '+dt.getDate();
+      g+='<text x="0" y="'+(y+rh/2+4)+'"'+(k===tk?' class="t-fg"':'')+'>'+lbl+'</text>'}
+    g+='<rect class="lane" x="'+lw+'" y="'+(y+2)+'" width="'+(X(h1)-lw).toFixed(1)+'" height="'+(rh-4)+'" rx="3"/>';
+    list.forEach(s=>{const sp=SPAN(s),ha=(sp[0]-d)/3600000,hb=Math.min(h1,(sp[1]-d)/3600000),x1=X(Math.max(h0,ha)),x2=X(hb),t=tagFind(s.tag);
+      g+='<rect class="blk" data-id="'+s.id+'" x="'+x1.toFixed(1)+'" y="'+(y+2)+'" width="'+Math.max(2,x2-x1-2).toFixed(1)+'" height="'+(rh-4)+'" rx="3" fill="'+(t?t.color:'var(--l3)')+'" data-tip="'+esc(fmtDay(sp[0])+', '+hm(sp[0])+'–'+hm(sp[1])+'\n'+fmtDur(s.actual)+' worked'+(t?' · '+t.name:'')+(s.rating?' · focus '+s.rating:'')+(s.note?'\n'+s.note:''))+'"/>'});
+    g+='<text class="tot" x="'+W+'" y="'+(y+rh/2+4)+'" text-anchor="end">'+(tot?fmtDur(tot):'–')+'</text>'});
+  host.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="When each block ran">'+g+'</svg>';
+  $('#sWhenHint').textContent='Each bar is one block, from start to finish. Hover for details, click to edit.';
+  $('#sWhenLegend').innerHTML=inP.length?tagsIn(inP):'<span>No blocks in this period.</span>';
 }
-
-/* review tab */
-function rPeriod(){const o=S.rOff,n=new Date();
-  if(S.range==='week'){const s=startOfWeek(n);s.setDate(s.getDate()+o*7);const e=new Date(s);e.setDate(s.getDate()+7);return {from:s.getTime(),to:e.getTime(),label:s.toLocaleDateString([],{day:'numeric',month:'short'})+' to '+new Date(e-DAYMS).toLocaleDateString([],{day:'numeric',month:'short'})}}
-  if(S.range==='month'){const s=new Date(n.getFullYear(),n.getMonth()+o,1),e=new Date(s.getFullYear(),s.getMonth()+1,1);return {from:s.getTime(),to:e.getTime(),label:s.toLocaleDateString([],{month:'long',year:'numeric'})}}
-  const y=n.getFullYear()+o;return {from:new Date(y,0,1).getTime(),to:new Date(y+1,0,1).getTime(),label:String(y)}}
-function renderReview(){
-  const demoOn=isDemo(),D=data();$('#demoReview').hidden=!demoOn;
-  const now=Date.now(),ws=startOfWeek(now).getTime(),ms=new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime(),sum=a=>a.reduce((x,s)=>x+s.actual,0);
-  const td=sum(D.filter(s=>dayKey(s.start)===dayKey(now))),wk=D.filter(s=>s.start>=ws),wkm=sum(wk),mo=sum(D.filter(s=>s.start>=ms));
-  const days=new Set(D.filter(s=>s.start>=now-28*DAYMS).map(s=>dayKey(s.start))).size,dg=demoOn?0:S.settings.dayGoal,wg=demoOn?0:S.settings.weekGoal;
-  const tile=(v,k,p)=>'<div class="tile"><span class="v">'+v+'</span><span class="k">'+k+'</span>'+(p!=null?'<div class="mini"><span style="width:'+(clamp(p,0,1)*100).toFixed(0)+'%"></span></div>':'')+'</div>';
-  $('#tiles').innerHTML=tile(fmtDur(td),'Today'+(dg?' of '+fmtGoal(dg):''),dg?td/dg:null)+tile(fmtDur(wkm),'This week'+(wg?' of '+fmtGoal(wg):''),wg?wkm/wg:null)+tile(fmtDur(mo),'This month')+tile(String(wk.filter(s=>s.rating===5).length),'Flow blocks this week')+tile(days+'/28','Days worked, last 4 weeks');
-  $$('#rangeSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.range===S.range)));
-  const p=rPeriod(),inP=D.filter(s=>s.start>=p.from&&s.start<p.to);
-  renderWeekCard(D);renderRange(D,p);renderSplit(inP,p);renderFacts(D);renderTable(D,demoOn);
+function renderSHeat(inP,W){
+  const M=Array.from({length:7},()=>new Array(24).fill(0));inP.forEach(s=>slices(s,(d,m)=>{M[(d.getDay()+6)%7][d.getHours()]+=m}));
+  const max=Math.max(0,...M.map(r=>Math.max(...r))),lw=40,top=22,cs=(W-lw)/24,ch=Math.max(18,Math.min(30,cs)),H=top+7*ch+4;
+  const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],longN=['Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays','Sundays'],lv=v=>v<=0?0:Math.min(4,Math.ceil(v/max*4));
+  let g='';for(let h=0;h<24;h+=3)g+='<text x="'+(lw+h*cs).toFixed(1)+'" y="14">'+pad(h)+':00</text>';
+  for(let r=0;r<7;r++){g+='<text x="0" y="'+(top+r*ch+ch/2+4)+'">'+names[r]+'</text>';
+    for(let h=0;h<24;h++){const v=M[r][h];g+='<rect class="lv'+lv(v)+'" x="'+(lw+h*cs+1).toFixed(1)+'" y="'+(top+r*ch+1)+'" width="'+Math.max(1,cs-2).toFixed(1)+'" height="'+(ch-2)+'" rx="3" data-tip="'+esc(longN[r]+', '+pad(h)+':00–'+pad((h+1)%24)+':00\n'+(v?fmtDur(v)+' in total':'No work'))+'"/>'}}
+  $('#sWhen').innerHTML='<svg class="heat" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Time worked by weekday and hour">'+g+'</svg>';
+  $('#sWhenHint').textContent='Total time worked in each hour of each weekday, across the year.';
+  const q=i=>fmtDur(max*i/4);
+  $('#sWhenLegend').innerHTML=max?'<span><i class="lv0"></i>none</span><span><i class="lv1"></i>up to '+q(1)+'</span><span><i class="lv2"></i>up to '+q(2)+'</span><span><i class="lv3"></i>up to '+q(3)+'</span><span><i class="lv4"></i>up to '+q(4)+'</span>':'<span>No blocks in this period.</span>';
 }
-function renderRange(D,p){
-  let B=[];
-  if(S.range==='week'){for(let i=0;i<7;i++){const d=new Date(p.from);d.setDate(d.getDate()+i);B.push({k:dayKey(d),lbl:d.toLocaleDateString([],{weekday:'short'}),from:d.getTime(),to:d.getTime()+DAYMS})}}
-  else if(S.range==='month'){const s=new Date(p.from),dd=new Date(s.getFullYear(),s.getMonth()+1,0).getDate();for(let i=1;i<=dd;i++){const d=new Date(s.getFullYear(),s.getMonth(),i);B.push({k:dayKey(d),lbl:String(i),from:d.getTime(),to:d.getTime()+DAYMS})}}
-  else{const y=new Date(p.from).getFullYear();for(let m=0;m<12;m++){const a=new Date(y,m,1),b=new Date(y,m+1,1);B.push({k:y+'-'+m,lbl:a.toLocaleDateString([],{month:'short'}),from:a.getTime(),to:b.getTime()})}}
-  $('#rangeLbl').textContent=p.label;$('#nextR').disabled=S.rOff>=0;
-  B.forEach(b=>{const ss=D.filter(s=>s.start>=b.from&&s.start<b.to);b.h=ss.reduce((a,s)=>a+s.actual,0)/60;b.flow=ss.filter(s=>s.rating===5).length;b.n=ss.length});
-  const goalH=S.range!=='year'&&!isDemo()&&S.settings.dayGoal?S.settings.dayGoal/60:0;
-  const W=Math.max(420,B.length*24,($('#rangeChart').clientWidth||700)-2),H=220,pl=34,pb=24,pt=18,ih=H-pb-pt,maxH=Math.max(1,goalH,Math.ceil(Math.max(...B.map(b=>b.h))));
-  const step=maxH<=4?1:maxH<=10?2:maxH<=40?10:50,top=Math.ceil(maxH/step)*step,bw=(W-pl-8)/B.length,tk=dayKey(Date.now());let g='';
-  for(let v=0;v<=top;v+=step){const y=pt+ih-(v/top)*ih;g+='<line class="grid" x1="'+pl+'" x2="'+(W-4)+'" y1="'+y+'" y2="'+y+'"/><text x="'+(pl-6)+'" y="'+(y+3)+'" text-anchor="end">'+v+'h</text>'}
-  B.forEach((b,i)=>{const x=pl+i*bw+bw*.18,w=bw*.64,h=(b.h/top)*ih,y=pt+ih-h;
-    if(b.h>0)g+='<rect class="bar" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+Math.max(h,1).toFixed(1)+'" rx="'+Math.min(6,w/2).toFixed(1)+'" opacity="'+(b.k===tk?1:.82)+'"><title>'+b.lbl+': '+fmtDur(b.h*60)+', '+b.n+' blocks, '+b.flow+' flow</title></rect>';
-    if(b.flow)g+='<circle class="flowdot" cx="'+(x+w/2).toFixed(1)+'" cy="'+(y-8).toFixed(1)+'" r="3.6"/>';
-    if(B.length<=12||i%2===0||i===B.length-1)g+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle"'+(b.k===tk?' class="barlbl"':'')+'>'+b.lbl+'</text>'});
-  if(goalH){const y=pt+ih-(goalH/top)*ih;g+='<line x1="'+pl+'" x2="'+(W-4)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="var(--bloom)" stroke-width="1.5" stroke-dasharray="5 5"/>'}
-  $('#rangeChart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Hours worked per period">'+g+'</svg>';
-  const tot=B.reduce((a,b)=>a+b.h,0),fl=B.reduce((a,b)=>a+b.flow,0),nb=B.reduce((a,b)=>a+b.n,0);
-  $('#rangeSum').textContent='Total '+fmtDur(tot*60)+' in '+nb+' blocks, '+fl+' flow blocks.'+(goalH?' The dashed line is your daily goal.':'')+' Red dots mark days with flow blocks.';
+function renderSHourly(inP){
+  const A=new Array(24).fill(0);inP.forEach(s=>slices(s,(d,m)=>{A[d.getHours()]+=m}));const host=$('#sHourly');
+  if(!inP.length){host.innerHTML='<p class="muted">No blocks in this period.</p>';return}
+  const B=A.map((m,h)=>({m,lbl:pad(h),showLbl:h%3===0,tip:pad(h)+':00–'+pad((h+1)%24)+':00\n'+(m?fmtDur(m)+' worked':'No work')}));
+  host.innerHTML=barChart(B,{w:(host.clientWidth||400)-2,H:200,label:'Time worked in each hour of the day'});
 }
-function renderSplit(inP,p){
+function renderSTags(inP){
   const by={};inP.forEach(s=>{const k=tagFind(s.tag)?s.tag:'';by[k]=(by[k]||0)+s.actual});
   const tot=Object.values(by).reduce((a,b)=>a+b,0),keys=Object.keys(by).sort((a,b)=>by[b]-by[a]);
-  if(!tot){$('#tagSplit').innerHTML='<p class="muted">No blocks in this period.</p>';return}
+  if(!tot){$('#sTags').innerHTML='<p class="muted">No blocks in this period.</p>';return}
   const max=Math.max(...Object.values(by));
-  let h=keys.map(k=>{const t=tagFind(k),c=t?t.color:'var(--muted)';return '<div class="r"><span class="n"><span class="dot" style="background:'+c+'"></span>'+(t?esc(t.name):'Untagged')+'</span><span class="bt"><span style="width:'+(by[k]/max*100).toFixed(1)+'%;background:'+c+'"></span></span><span class="v">'+fmtDur(by[k])+'<small>'+Math.round(by[k]/tot*100)+'%</small></span></div>'}).join('');
+  let h=keys.map(k=>{const t=tagFind(k),c=t?t.color:'var(--l3)';return '<div class="r"><span class="n"><span class="dot" style="background:'+c+'"></span>'+(t?esc(t.name):'Untagged')+'</span><span class="bt"><span style="width:'+(by[k]/max*100).toFixed(1)+'%;background:'+c+'"></span></span><span class="v">'+fmtDur(by[k])+'<small>'+Math.round(by[k]/tot*100)+'%</small></span></div>'}).join('');
   if(!tagsAll().length)h+='<p class="hint" style="margin:0">Add tags in Settings to see where your hours go.</p>';
-  $('#tagSplit').innerHTML=h+'<p class="hint" style="margin:0">'+p.label+'</p>';
+  $('#sTags').innerHTML=h;
 }
-function renderFacts(D){
-  const out=[],cut=Date.now()-56*DAYMS,R=D.filter(s=>s.start>=cut);
-  // most productive weekday by average hours on days worked
-  const wd=Array.from({length:7},()=>({h:0,days:new Set()}));R.forEach(s=>{const d=new Date(s.start),i=(d.getDay()+6)%7;wd[i].h+=s.actual/60;wd[i].days.add(dayKey(s.start))});
-  const names=['Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays','Sundays'];
-  const wdo=wd.map((x,i)=>({i,avg:x.days.size?x.h/x.days.size:0,n:x.days.size})).filter(x=>x.n>=2).sort((a,b)=>b.avg-a.avg);
-  if(wdo.length>=3)out.push(['D','Your strongest day is '+names[wdo[0].i],'You average '+fmtDur(wdo[0].avg*60)+' on '+names[wdo[0].i]+' you work, versus '+fmtDur(wdo[wdo.length-1].avg*60)+' on '+names[wdo[wdo.length-1].i]+'.']);
-  // best start window by focus
-  const rated=R.filter(s=>s.rating),win=[[5,9,'early morning'],[9,12,'late morning'],[12,15,'early afternoon'],[15,18,'late afternoon'],[18,24,'evening']];
-  const ws=win.map(w=>{const a=rated.filter(s=>{const h=new Date(s.start).getHours();return h>=w[0]&&h<w[1]}).map(s=>s.rating);return {w,n:a.length,m:mean(a)}}).filter(x=>x.n>=4).sort((a,b)=>b.m-a.m);
-  if(ws.length>=2)out.push(['T','You focus best in the '+ws[0].w[2],'Average focus '+ws[0].m.toFixed(1)+' for blocks started '+pad(ws[0].w[0])+':00 to '+pad(ws[0].w[1]%24)+':00, versus '+ws[ws.length-1].m.toFixed(1)+' in the '+ws[ws.length-1].w[2]+'.']);
-
-  // best length
-  const byL={};rated.forEach(s=>{(byL[s.planned]=byL[s.planned]||[]).push(s.rating)});
-  const ls=Object.keys(byL).map(L=>({L:+L,n:byL[L].length,m:mean(byL[L])})).filter(x=>x.n>=5).sort((a,b)=>b.m-a.m||b.L-a.L);
-  if(ls.length>=2)out.push(['L',ls[0].L+' minute blocks suit you best','Average focus '+ls[0].m.toFixed(1)+' over '+ls[0].n+' rated blocks, the highest of the '+ls.length+' lengths you use regularly.']);
-
-  // breaks
-  const br=R.filter(s=>s.brkOver!=null&&s.brkActual!=null);
-  if(br.length>=5){const over=br.filter(s=>s.brkOver>1).length/br.length;out.push(['B',over<.2?'Your breaks stay on time':'Breaks often run long',Math.round(over*100)+'% of breaks ran over by more than a minute, by '+mean(br.map(s=>s.brkOver)).toFixed(1)+' min on average.'+(over>=.2?' Turning on auto start in Settings fixes this.':'')])}
-  const more=(ws.length<2||ls.length<2)?'<li><span class="hint">'+(out.length?'More patterns':'Patterns')+' appear as you go: about two weeks of blocks for your strongest day, and focus ratings during breaks for your best time and block length ('+rated.length+' rated in the last 8 weeks).</span></li>':'';
-  $('#facts').innerHTML=out.map(f=>'<li><div class="ic">'+f[0]+'</div><div><b>'+esc(f[1])+'</b><span>'+esc(f[2])+'</span></div></li>').join('')+more+(out.length?'<li><span class="hint">Based on the last 8 weeks.</span></li>':'');
+function renderSLog(inP,demoOn){
+  const rows=inP.slice().sort((a,b)=>b.start-a.start),lim=S.sAll?rows.length:100;
+  let h='<thead><tr><th>Date</th><th>Time</th><th>Worked</th><th>vs plan</th><th>What</th><th>Focus</th><th></th></tr></thead><tbody>';
+  if(!rows.length)h+='<tr><td colspan="7" class="hint">No blocks in this period.</td></tr>';
+  rows.slice(0,lim).forEach(s=>{const sp=SPAN(s),t=tagFind(s.tag),d=s.manual||!s.planned?null:Math.round(s.actual-(s.planned+(s.ext||0)));
+    const what=(t?'<span class="pill"><span class="dot" style="background:'+t.color+'"></span>'+esc(t.name)+'</span> ':'')+(esc(s.note||s.label)||(t?'':'<span class="hint">–</span>'));
+    h+='<tr><td class="n">'+new Date(s.start).toLocaleDateString([],{weekday:'short',day:'numeric',month:'short'})+'</td><td class="n">'+hm(sp[0])+'–'+hm(sp[1])+'</td><td class="n"><b>'+fmtDur(s.actual)+'</b></td><td class="n">'+(d==null?'<span class="hint">added</span>':Math.abs(d)<1?'<span class="hint">on plan</span>':(d>0?'+':'−')+fmtDur(Math.abs(d)))+'</td><td class="act">'+what+'</td><td class="n">'+(s.rating?s.rating+' '+LABELS[s.rating]:'')+'</td><td>'+(demoOn?'':'<button class="del" data-edit="'+s.id+'">Edit</button>')+'</td></tr>'});
+  $('#sLog').innerHTML=h+'</tbody>';
+  $('#sLogHint').textContent=rows.length?rows.length+' block'+(rows.length===1?'':'s')+(rows.length>lim?', showing the latest '+lim:''):'';
+  const more=$('#sMore');more.hidden=rows.length<=lim;more.textContent='Show all '+rows.length;
 }
-function renderTable(D,demoOn){
-  const rows=D.slice().sort((a,b)=>b.start-a.start).slice(0,50);
-  let h='<thead><tr><th>Date</th><th>What</th><th>Worked</th><th>Focus</th><th>Break</th><th></th></tr></thead><tbody>';
-  if(!rows.length)h+='<tr><td colspan="6">No blocks yet.</td></tr>';
-  rows.forEach(s=>{const d=new Date(s.start),t=tagFind(s.tag),brk=s.brkPlanned==null?'':(s.brkActual==null?s.brkPlanned+'m':Math.round(s.brkActual)+'/'+s.brkPlanned+'m');
-    const what=(t?'<span class="pill"><span class="dot" style="background:'+t.color+'"></span>'+esc(t.name)+'</span> ':'')+(esc(s.note||s.label)||(t?'':'<span class="hint">none</span>'));
-    h+='<tr><td class="n">'+d.toLocaleDateString([],{day:'2-digit',month:'short'})+' '+hm(s.start)+'</td><td class="act">'+what+'</td><td class="n">'+Math.round(s.actual)+'m'+(s.ext?' <span class="pill">+'+s.ext+'</span>':'')+(s.early?' <span class="pill">ended early</span>':'')+'</td><td class="n">'+(s.rating===5?'<span class="pill flow">5 Flow</span>':(s.rating||''))+'</td><td class="n">'+brk+'</td><td>'+(demoOn?'':'<button class="del" data-edit="'+s.id+'">Edit</button>')+'</td></tr>'});
-  $('#sessTbl').innerHTML=h+'</tbody>';
-}
+/* hover details for every chart mark that carries data-tip */
+const tipEl=document.createElement('div');tipEl.className='tip';tipEl.setAttribute('aria-hidden','true');document.body.appendChild(tipEl);
+document.addEventListener('pointermove',e=>{const t=e.target&&e.target.closest?e.target.closest('[data-tip]'):null;
+  if(!t){tipEl.classList.remove('show');return}
+  tipEl.textContent=t.getAttribute('data-tip');tipEl.classList.add('show');
+  const r=tipEl.getBoundingClientRect(),x=Math.min(window.innerWidth-r.width-8,e.clientX+14),y=e.clientY+r.height+22>window.innerHeight?e.clientY-r.height-12:e.clientY+16;
+  tipEl.style.left=Math.max(8,x)+'px';tipEl.style.top=y+'px'});
+document.addEventListener('pointerdown',e=>{if(!(e.target.closest&&e.target.closest('[data-tip]')))tipEl.classList.remove('show')});
+document.addEventListener('scroll',()=>tipEl.classList.remove('show'),{passive:true});
 
 /* account (Supabase auth + sync) */
 const SUPABASE_URL='https://tdgufuwotovstrkbllwm.supabase.co';
@@ -1300,14 +1156,14 @@ function renderOb(){
   $$('#obGoal button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===obSel.goal)));
   const all=SUGGEST.concat(Array.from(obSel.tags).filter(t=>SUGGEST.indexOf(t)<0));
   $('#obTags').innerHTML=all.map(t=>'<button data-ob="'+esc(t)+'" aria-pressed="'+obSel.tags.has(t)+'">'+esc(t)+'</button>').join('');
-  $('#obNext').textContent=obStep<3?'Next':'Start painting';
+  $('#obNext').textContent=obStep<3?'Next':'Done';
   $('#obNext').disabled=(obStep===1&&obSel.work==null)||(obStep===2&&obSel.goal==null);
 }
 function finishOb(){const st=S.settings;
   if(obSel.work){st.work=obSel.work;st.brk=obSel.work<=25?5:obSel.work>=90?15:10}
   if(obSel.goal!=null)st.dayGoal=obSel.goal;
   obSel.tags.forEach(n=>addTag(n));if(st.tags.length&&!st.lastTag)st.lastTag=null;
-  st.onboarded=true;saveSettings();$('#obModal').hidden=true;renderAll();toast('All set. Press Space to begin your first block.')}
+  st.onboarded=true;saveSettings();$('#obModal').hidden=true;renderAll();toast('All set. Press Space to start your first block.')}
 
 /* add or edit a block */
 let ED={id:null,tag:null,rating:null};
@@ -1334,7 +1190,7 @@ function saveEditor(){
   if(!old||s.manual||Math.round(s.actual)!==Math.round(mn))s.planned=old&&!s.manual?s.planned:mn;
   s.start=start;s.end=start+mn*60000;s.actual=mn;s.tag=ED.tag||null;s.note=$('#edNote').value.trim();s.rating=ED.rating||null;
   upsert(s);S.sessions.sort((a,b)=>a.start-b.start);persistLocal();
-  closeEditor();renderAll();const ms=checkMilestone();if(ms){petalRain();toast('Milestone: '+ms[0]+' hours painted. '+ms[1]+' unlocked.')}else toast(old?'Block updated':fmtDur(mn)+' added to your gallery');
+  closeEditor();renderAll();toast(old?'Block updated':fmtDur(mn)+' added');
 }
 function deleteFromEditor(){
   const s=findS(ED.id);if(!s)return;const k=store.monthKey(s.start);
@@ -1343,26 +1199,8 @@ function deleteFromEditor(){
   toast('Block deleted','Undo',()=>{delete S.del[s.id];ls.set('fm.del',S.del);upsert(s);S.sessions.sort((a,b)=>a.start-b.start);persistLocal();renderAll();toast('Block restored')});
 }
 
-/* week in review */
+/* weekly banner */
 function wkRange(which){const s=startOfWeek(Date.now());if(which==='last')s.setDate(s.getDate()-7);const e=new Date(s);e.setDate(s.getDate()+7);return {from:s.getTime(),to:e.getTime(),key:dayKey(s)}}
-function renderWeekCard(D){
-  const which=S.wkView,r=wkRange(which),sum=a=>a.reduce((x,s)=>x+s.actual,0);
-  $$('#wkSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.wk===which)));
-  $('#wkTitle').textContent='Week in review, '+new Date(r.from).toLocaleDateString([],{day:'numeric',month:'short'})+' to '+new Date(r.to-DAYMS).toLocaleDateString([],{day:'numeric',month:'short'});
-  const W=D.filter(s=>s.start>=r.from&&s.start<r.to),P=D.filter(s=>s.start>=r.from-7*DAYMS&&s.start<r.from),wm=sum(W),pm=sum(P),ag=aggDays(W),fl=W.filter(s=>s.rating===5).length;
-  let delta='Worked';if(pm>0){const d=Math.round((wm-pm)/pm*100);delta='<span class="'+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d+'%</span> vs the week before'}else if(wm)delta='Worked, first tracked week';
-  const dg=isDemo()?0:S.settings.dayGoal,wg=isDemo()?0:S.settings.weekGoal;
-  let st='<div><b>'+fmtDur(wm)+'</b><span>'+delta+'</span></div><div><b>'+Object.keys(ag).length+'/7</b><span>Days worked</span></div><div><b>'+W.length+'</b><span>Blocks</span></div><div><b>'+fl+'</b><span>Flow blocks</span></div>';
-  if(dg)st+='<div><b>'+Object.values(ag).filter(a=>a.h*60>=dg).length+'</b><span>Days the daily goal was met</span></div>';
-  if(wg)st+='<div><b>'+Math.round(wm/wg*100)+'%</b><span>of your weekly goal</span></div>';
-  const by={};W.forEach(s=>{if(tagFind(s.tag))by[s.tag]=(by[s.tag]||0)+s.actual});const tt=Object.keys(by).sort((a,b)=>by[b]-by[a])[0];
-  if(tt)st+='<div><b>'+esc(tagFind(tt).name)+'</b><span>Most time, '+fmtDur(by[tt])+'</span></div>';
-  $('#wkStats').innerHTML=st;
-  const N=W.filter(s=>s.note).sort((a,b)=>a.start-b.start);
-  $('#wkNotes').innerHTML=N.length?N.map(s=>{const t=tagFind(s.tag);return '<li><span class="d">'+new Date(s.start).toLocaleDateString([],{weekday:'short'})+'</span>'+(t?'<span class="dot" style="background:'+t.color+'"></span>':'')+'<span>'+esc(s.note)+'</span></li>'}).join(''):'<li class="hint">No notes yet. Add one during a break; it takes five seconds and builds a record of what you made.</li>';
-  const ta=$('#reflInput');ta.dataset.key=r.key;ta.disabled=isDemo();if(document.activeElement!==ta)ta.value=isDemo()?'':((S.refl[r.key]||{}).t||'');
-  if(which==='last'&&!isDemo()&&S.settings.reviewSeen!==r.key){S.settings.reviewSeen=r.key;saveSettings()}
-}
 function renderWkBanner(){
   const b=$('#wkBanner');if(isDemo()){b.hidden=true;return}
   const r=wkRange('last'),W=S.sessions.filter(s=>s.start>=r.from&&s.start<r.to);
@@ -1377,24 +1215,6 @@ function setZen(on){zen=!!on;$('#app').classList.toggle('zen',zen);
       else if(!zen&&document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}
   const r=S.run;$('#zenPause').textContent=r&&r.pausedAt?'Resume':'Pause'}
 function announce(t){const l=$('#live');l.textContent='';setTimeout(()=>{l.textContent=t},50)}
-
-/* milestones */
-const MS=[[1,'Sumi ink'],[5,'Grey wash'],[10,'Indigo ink'],[25,'Ochre ink'],[50,'Moss ink'],[100,'Vermilion ink'],[250,'Plum ink'],[500,'Celadon ink'],[1000,'Gold leaf']];
-const MS_INK=['#23201D','#8A8378','#2F3E5C','#B8863B','#5E6B4E','#B33A2A','#6B4E6B','#7FA393','#C9A54A'];
-const lifetimeH=()=>S.sessions.reduce((a,s)=>a+s.actual,0)/60;
-function msReached(){const h=lifetimeH();return MS.filter(m=>h>=m[0]).length}
-function msIcon(i){const c=MS_INK[i];let g='<svg viewBox="0 0 56 64" aria-hidden="true">';
-  g+='<circle cx="28" cy="30" r="22" fill="none" stroke="'+c+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="126 140" transform="rotate('+(-80+i*31)+' 28 30)" filter="url(#brushEdge)" opacity=".92"/>';
-  if(i===MS.length-1)g+='<rect x="38" y="44" width="9" height="9" rx="1.5" fill="#B33A2A"/>';
-  return g+'</svg>'}
-function checkMilestone(silentInit){const r=msReached();
-  if(S.settings.msSeen<0||silentInit&&S.settings.msSeen<0){S.settings.msSeen=r;saveSettings();return null}
-  if(r>S.settings.msSeen){S.settings.msSeen=r;saveSettings();return MS[r-1]}return null}
-function renderMilestones(){
-  const h=isDemo()?0:lifetimeH(),r=MS.filter(m=>h>=m[0]).length,next=MS[r];
-  $('#msRow').innerHTML=MS.map((m,i)=>'<div class="m'+(i<r?'':' locked')+(i===r?' next':'')+'">'+msIcon(i)+'<b>'+m[0]+'h</b><span>'+(i<r?m[1]:i===r?fmtDur((m[0]-h)*60)+' to go':'Locked')+'</span></div>').join('');
-  $('#msTxt').textContent=fmtDur(h*60)+' painted in total'+(next?'. Next: '+next[1]+' at '+next[0]+'h.':'. Every ink unlocked.');
-}
 
 /* backup */
 async function downloadBackup(){
@@ -1414,15 +1234,14 @@ function restoreBackup(file){
     if(o.settings&&Array.isArray(o.settings.tags))o.settings.tags.forEach(t=>{if(t&&t.id&&t.name&&!tagOf(t.id))S.settings.tags.push({id:t.id,name:String(t.name).slice(0,24),color:TAG_COLORS.indexOf(inkTag(t.color))>=0?inkTag(t.color):TAG_COLORS[0]})});
     if(o.reflections&&typeof o.reflections==='object')Object.keys(o.reflections).forEach(k=>{const v=o.reflections[k];if(v&&typeof v.t==='string'&&(!S.refl[k]||(v.u||0)>(S.refl[k].u||0)))S.refl[k]=v});
     persistLocal();ls.set('fm.refl',S.refl);store.saveBlocks(Array.from(touched));saveSettings();store.saveRefl();
-    if(S.settings.msSeen>=0)S.settings.msSeen=msReached();
     renderAll();renderSettings();toast('Restored. '+added+' new block'+(added===1?'':'s')+' added.');
   };rd.readAsText(file);
 }
 
 function renderAll(){
-  renderTimer();if(S.tab==='garden')renderGardenTab();if(S.tab==='review')renderReview();
+  renderTimer();if(S.tab==='stats')renderStats();
 }
-function setTab(t){S.tab=t;['focus','garden','review'].forEach(x=>{$('#tab-'+x).hidden=x!==t;$('#t-'+x).setAttribute('aria-selected',String(x===t))});renderAll()}
+function setTab(t){S.tab=t;['focus','stats'].forEach(x=>{$('#tab-'+x).hidden=x!==t;$('#t-'+x).setAttribute('aria-selected',String(x===t))});renderAll()}
 let toastT=0,toastFn=null;function toast(m,label,fn){const t=$('#toast'),b=$('#toastAct');$('#toastMsg').textContent=m;toastFn=fn||null;b.hidden=!fn;b.textContent=label||'';t.classList.toggle('act',!!fn);t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>{t.classList.remove('show','act');toastFn=null},fn?6000:2800)}
 
 function saveFile(name,text,type){const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
@@ -1465,7 +1284,10 @@ $$('.tabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.ta
 $('#startBtn').addEventListener('click',startWork);
 $('#pauseBtn').addEventListener('click',togglePause);
 $('#plusBtn').addEventListener('click',addTen);
-$('#stopBtn').addEventListener('click',()=>endWork(true));
+$('#stopBtn').addEventListener('click',()=>endWork());
+$('#zenStop').addEventListener('click',()=>endWork());
+$('#overCap').addEventListener('click',()=>endWork(true));
+$('#bedList').addEventListener('click',e=>{const d=e.target.closest('[data-edit]');if(d)openEditor(d.dataset.edit)});
 $('#keepBtn').addEventListener('click',()=>{saveNoteFrom('#noteInput');keepWorking()});
 $('#skipBreak').addEventListener('click',skipBreak);
 $('#nextBlock').addEventListener('click',nextBlock);
@@ -1473,18 +1295,12 @@ $('#doneDay1').addEventListener('click',stopForNow);
 $('#doneDay2').addEventListener('click',stopForNow);
 ['#noteInput','#noteInput2'].forEach(id=>{$(id).addEventListener('change',()=>saveNoteFrom(id));$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){saveNoteFrom(id);e.target.blur();toast('Note saved')}})});
 ['#rates','#rates2'].forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('[data-rate]');if(b)rate(+b.dataset.rate)}));
-$('#rangeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;S.range=b.dataset.range;S.rOff=0;renderReview()});
-$('#prevR').addEventListener('click',()=>{S.rOff--;renderReview()});
-$('#nextR').addEventListener('click',()=>{if(S.rOff<0){S.rOff++;renderReview()}});
-$('#exportBtn').addEventListener('click',exportCSV);
-$('#addBtn').addEventListener('click',()=>openEditor(null));
 $('#zenBtn').addEventListener('click',()=>setZen(true));
 $('#zenExit').addEventListener('click',()=>setZen(false));
 $('#zenPause').addEventListener('click',togglePause);
 $('#zenAuto').addEventListener('change',e=>{S.settings.zenAuto=e.target.checked;saveSettings()});
 $('#backupBtn').addEventListener('click',downloadBackup);
 $('#restoreFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)restoreBackup(f);e.target.value=''});
-$('#gAdd').addEventListener('click',()=>openEditor(null,S.gRange==='day'?S.gAnchor:null));
 $('#edTags').addEventListener('click',e=>{const b=e.target.closest('[data-etag]');if(b){ED.tag=b.dataset.etag||null;renderEdChips()}});
 $('#edRate').addEventListener('click',e=>{const b=e.target.closest('[data-erate]');if(b){ED.rating=+b.dataset.erate||null;renderEdChips()}});
 $('#edSave').addEventListener('click',saveEditor);
@@ -1494,23 +1310,24 @@ $('#edDel').addEventListener('click',deleteFromEditor);
 $('#edModal').addEventListener('click',e=>{if(e.target.id==='edModal')closeEditor()});
 $('#edModal').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();saveEditor()}});
 $('#toastAct').addEventListener('click',()=>{const f=toastFn;toastFn=null;$('#toast').classList.remove('show','act');if(f)f()});
-$('#wkSeg').addEventListener('click',e=>{const b=e.target.closest('[data-wk]');if(!b)return;S.wkView=b.dataset.wk;renderWeekCard(data())});
-$('#wkBannerBtn').addEventListener('click',()=>{S.wkView='last';setTab('review');window.scrollTo(0,0)});
-let rfT=0;$('#reflInput').addEventListener('input',e=>{clearTimeout(rfT);const ta=e.target;rfT=setTimeout(()=>{const k=ta.dataset.key;if(!k)return;S.refl[k]={t:ta.value,u:Date.now()};ls.set('fm.refl',S.refl);store.saveRefl()},700)});
-$('#sessTbl').addEventListener('click',e=>{const d=e.target.closest('[data-edit]');if(d)openEditor(d.dataset.edit)});
-$('#gRangeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;S.gRange=b.dataset.g;S.gAnchor=Date.now();renderGardenTab()});
-$('#gPrev').addEventListener('click',()=>gShift(-1));
-$('#gNext').addEventListener('click',()=>{if(gPeriod().to<=Date.now())gShift(1)});
-$('#gView').addEventListener('click',e=>{const d=e.target.closest('[data-day]'),m=e.target.closest('[data-month]');
-  if(d){S.gRange='day';S.gAnchor=parseKey(d.dataset.day);renderGardenTab()}
-  else if(m){const q=m.dataset.month.split('-').map(Number);S.gRange='month';S.gAnchor=new Date(q[0],q[1],1).getTime();renderGardenTab()}});
+$('#wkBannerBtn').addEventListener('click',()=>{S.sRange='week';S.sAnchor=addDays(Date.now(),-7);S.sAll=false;setTab('stats');window.scrollTo(0,0)});
+$('#sRangeSeg').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;S.sRange=b.dataset.s;S.sAnchor=Date.now();S.sAll=false;renderStats()});
+$('#sPrev').addEventListener('click',()=>sShift(-1));
+$('#sNext').addEventListener('click',()=>{if(sPeriod().to<=Date.now())sShift(1)});
+$('#sNow').addEventListener('click',()=>{S.sAnchor=Date.now();S.sAll=false;renderStats()});
+$('#sAdd').addEventListener('click',()=>openEditor(null,S.sRange==='day'?S.sAnchor:null));
+$('#sExport').addEventListener('click',exportCSV);
+$('#sMore').addEventListener('click',()=>{S.sAll=true;renderStats()});
+$('#sHours').addEventListener('click',e=>{const c=e.target.closest('[data-go]');if(!c)return;S.sRange=c.dataset.go;S.sAnchor=+c.dataset.from;S.sAll=false;tipEl.classList.remove('show');renderStats()});
+$('#sWhen').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(b&&!isDemo())openEditor(b.dataset.id)});
+$('#sLog').addEventListener('click',e=>{const d=e.target.closest('[data-edit]');if(d)openEditor(d.dataset.edit)});
 $('#obLen').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){obSel.work=+b.dataset.v;renderOb()}});
 $('#obGoal').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b){obSel.goal=+b.dataset.v;renderOb()}});
 $('#obTags').addEventListener('click',e=>{const b=e.target.closest('[data-ob]');if(!b)return;const n=b.dataset.ob;if(obSel.tags.has(n))obSel.tags.delete(n);else obSel.tags.add(n);renderOb()});
 $('#obTagInput').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=e.target.value.trim().slice(0,24);if(v){obSel.tags.add(v);e.target.value='';renderOb()}}});
 $('#obNext').addEventListener('click',()=>{if(obStep<3){obStep++;renderOb()}else finishOb()});
 $('#obSkip').addEventListener('click',()=>{S.settings.onboarded=true;saveSettings();$('#obModal').hidden=true;renderAll()});
-let rzT=0;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(S.tab==='garden')renderGardenTab();else if(S.tab==='focus')renderBed()},200)});
+let rzT=0;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{if(S.tab==='stats')renderStats();else if(S.tab==='focus')renderBed()},200)});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&zen){setZen(false);return}
   if(e.key==='Escape'&&!$('#edModal').hidden){closeEditor();return}
@@ -1525,10 +1342,9 @@ document.addEventListener('keydown',e=>{
 });
 
 /* boot */
-if(S.run&&S.run.phase==='focus'&&!S.run.pausedAt&&Date.now()>=S.run.endsAt)endWork(false,true);
 if(S.run&&S.run.phase==='break'&&Date.now()>=S.run.endsAt){S.run.phase='breakEnd';saveRun()}
 (function(){let ch=false;S.settings.tags.forEach(t=>{const c=inkTag(t.color);if(c!==t.color){t.color=c;ch=true}});if(ch)saveSettings()})();
-initAuth();renderAll();store.init();checkMilestone(true);setTimeout(()=>{if(!authUser)maybeOnboard()},1500);
+initAuth();renderAll();store.init();setTimeout(()=>{if(!authUser)maybeOnboard()},1500);
 })();
 </script>
 
