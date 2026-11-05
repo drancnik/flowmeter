@@ -11,7 +11,7 @@ self.addEventListener('push', (event) => {
     body: data.body || '',
     tag: data.tag || 'flowmeter',
     icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    badge: '/badge-96.png', // Android status bar: must be white on transparent, or it shows as a white square
     data: { url: data.url || '/' }
   }));
 });
