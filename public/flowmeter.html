@@ -1316,7 +1316,9 @@ function openHabit(id,preset){
   $('#hmUnit').value=h&&h.kind==='count'?h.unit:p.unit||'';
   $('#hmHours').value=h&&h.kind==='focus'?h.target/60:p.kind==='focus'?p.target/60:'';
   $('#hmRemind').value=h&&h.remind||'';renderReminderUI();
-  $('#hmDel').hidden=!h;$('#hmErr').hidden=true;renderHM();$('#hModal').hidden=false;setTimeout(()=>$('#hmName').focus(),30)}
+  $('#hmDel').hidden=!h;$('#hmErr').hidden=true;renderHM();$('#hModal').hidden=false;
+  /* new habit: cursor in the name. Editing: focus the close button, so phones don't pop up the keyboard */
+  setTimeout(()=>(h?$('#hmClose'):$('#hmName')).focus({preventScroll:true}),30)}
 function renderHM(){
   $$('#hmKind button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.k===HM.kind)));
   $('#hmCountF').hidden=HM.kind!=='count';$('#hmFocusF').hidden=HM.kind!=='focus';
