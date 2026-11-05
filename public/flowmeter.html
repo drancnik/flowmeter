@@ -1220,7 +1220,6 @@ const isSched=(h,ts)=>!!(h.days&(1<<wdi(ts)))&&sod(ts)>=sod(h.created||0);
 const hTarget=h=>h.kind==='check'?1:h.target;
 const stepOf=h=>h.target<=10?1:h.target<=60?5:10;
 const fmtAmt=(h,v)=>h.kind==='focus'?fmtDur(v):(Math.round(v*100)/100)+(h.unit?' '+esc(h.unit):'');
-const HSUG=[{name:'Deep work',kind:'focus',target:180,days:31},{name:'Gym',kind:'check',days:21},{name:'Read',kind:'count',target:30,unit:'min',days:127},{name:'Water',kind:'count',target:8,unit:'glasses',days:127},{name:'No phone before 9',kind:'check',days:127}];
 let focusCache=null;
 function focusMin(k,tag){
   if(!focusCache){focusCache={};S.sessions.forEach(s=>{const d=dayKey(s.start),o=focusCache[d]||(focusCache[d]={'':0});o['']+=s.actual;if(s.tag)o[s.tag]=(o[s.tag]||0)+s.actual})}
@@ -1252,7 +1251,7 @@ function renderHabits(){
   $('#hTodayTitle').textContent='Today, '+new Date(now).toLocaleDateString([],{weekday:'long',day:'numeric',month:'short'});
   $('#hGridCard').hidden=$('#hSlackCard').hidden=!H.length;
   if(!H.length){$('#hTodaySum').textContent='';
-    $('#hToday').innerHTML='<p class="muted" style="margin:0 0 10px">Add the things you want to do every day. Each one gets a daily check, a streak and a hit rate, so you can see exactly where you slack. Start from one of these or make your own:</p><div class="tags">'+HSUG.map((s,i)=>'<button data-hsug="'+i+'">+ '+esc(s.name)+(s.kind==='focus'?' '+fmtGoal(s.target)+' (from timer)':s.kind==='count'?' '+s.target+' '+s.unit:'')+'</button>').join('')+'</div>';return}
+    $('#hToday').innerHTML='<p class="muted" style="margin:0 0 12px">No habits yet. Add the things you want to do every day. Each one gets a daily check, a streak and a hit rate, so you can see exactly where you slack.</p><button class="btn small" data-hnew>+ Add your first habit</button>';return}
   const today=H.filter(h=>isSched(h,now)),rest=H.filter(h=>!isSched(h,now)),nDone=today.filter(h=>hVal(h,k)>=hTarget(h)).length;
   $('#hTodaySum').textContent=today.length?nDone+' of '+today.length+' done':'Nothing scheduled today';
   let html=today.map(h=>habitRow(h,k)).join('');
@@ -1571,7 +1570,7 @@ $('#tab-habits').addEventListener('click',e=>{
   const ed=e.target.closest('[data-hedit]');if(ed){openHabit(ed.dataset.hedit);return}
   const tg=e.target.closest('[data-htog]');if(tg){toggleDay(tg.dataset.htog,dayKey(Date.now()));return}
   const st=e.target.closest('[data-hstep]');if(st){stepCount(st.dataset.hstep,+st.dataset.d);return}
-  const sg=e.target.closest('[data-hsug]');if(sg)openHabit(null,HSUG[+sg.dataset.hsug])});
+  if(e.target.closest('[data-hnew]'))openHabit(null)});
 $('#tab-habits').addEventListener('change',e=>{const i=e.target.closest('[data-hval]');if(!i)return;const h=findH(i.dataset.hval);if(h){setLog(h,dayKey(Date.now()),parseFloat(i.value)||0);renderHabits()}});
 $('#hmKind').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b){HM.kind=b.dataset.k;renderHM()}});
 $('#hmDays').addEventListener('click',e=>{const b=e.target.closest('[data-bit]');if(b){HM.days^=+b.dataset.bit;renderHM()}});
