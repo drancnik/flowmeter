@@ -515,6 +515,11 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
       <div class="field"><span class="lbl">Rest days per week that keep your streak alive</span>
         <div class="len" id="restSeg"><button data-v="0">None</button><button data-v="1">1</button><button data-v="2">2</button></div></div>
     </div>
+    <div class="sec" id="remSec">
+      <h4>Habit reminders</h4>
+      <p class="hint" id="remState" style="margin:0"></p>
+      <div class="row"><button class="btn small" id="remOn" type="button">Turn on for this device</button><button class="btn ghost small" id="remOff" type="button" hidden>Turn off for this device</button></div>
+    </div>
     <div class="sec">
       <h4>Sound</h4>
       <label class="toggle"><input type="checkbox" id="soundChk"> Chime when a block or break ends</label>
@@ -543,6 +548,7 @@ input[type=date]:focus,input[type=time]:focus{border-color:var(--ph);box-shadow:
     <div class="field" id="hmCountF" hidden><span class="lbl">Daily target</span><div class="len"><input type="number" id="hmTarget" min="0.01" max="100000" step="any" placeholder="30" aria-label="Daily target"><input type="text" id="hmUnit" maxlength="20" placeholder="unit: min, pages, glasses" style="width:210px;padding:6px 12px;font-size:14px" aria-label="Unit"></div></div>
     <div class="field" id="hmFocusF" hidden><span class="lbl">Focus time per day</span><div class="len"><input type="number" id="hmHours" min="0.25" max="16" step="0.25" placeholder="3" aria-label="Hours per day"><span class="unit">hours</span></div><span class="lbl" style="margin-top:4px">Count blocks tagged</span><div class="tags" id="hmTags"></div></div>
     <div class="field"><span class="lbl">Days</span><div class="seg" id="hmDays"></div><div class="row" style="gap:6px"><button class="chip-btn" data-preset="127">Every day</button><button class="chip-btn" data-preset="31">Weekdays</button><button class="chip-btn" data-preset="96">Weekends</button></div></div>
+    <div class="field"><label class="lbl" for="hmRemind">Remind me at <span class="hint">(optional, only if it's not done yet)</span></label><div class="len"><input type="time" id="hmRemind" style="width:150px"><button class="chip-btn" id="hmRemindClear" type="button">No reminder</button></div><span class="hint" id="hmRemindHint"></span></div>
     <p class="err" id="hmErr" hidden></p>
     <div class="row">
       <button class="btn danger small" id="hmDel">Delete</button>
@@ -684,8 +690,8 @@ const store={
     if(ch)ls.set('fm.refl',S.refl);
     return ch;
   },
-  habitToRow(h){return{id:h.id,name:h.name,kind:h.kind,target:h.kind==='check'?1:h.target,unit:h.unit||'',days:h.days,focus_tag:h.tag||null,sort:h.sort||0,created_at:new Date(h.created||Date.now()).toISOString(),deleted:!!h.deleted,updated_at:h.u||Date.now()}},
-  rowToHabit(r){return{id:r.id,name:r.name,kind:r.kind,target:Number(r.target),unit:r.unit||'',days:r.days,tag:r.focus_tag||null,sort:r.sort||0,created:new Date(r.created_at).getTime(),deleted:!!r.deleted,u:Number(r.updated_at)}},
+  habitToRow(h){return{id:h.id,name:h.name,kind:h.kind,target:h.kind==='check'?1:h.target,unit:h.unit||'',days:h.days,focus_tag:h.tag||null,remind_at:h.remind||null,sort:h.sort||0,created_at:new Date(h.created||Date.now()).toISOString(),deleted:!!h.deleted,updated_at:h.u||Date.now()}},
+  rowToHabit(r){return{id:r.id,name:r.name,kind:r.kind,target:Number(r.target),unit:r.unit||'',days:r.days,tag:r.focus_tag||null,remind:r.remind_at?String(r.remind_at).slice(0,5):null,sort:r.sort||0,created:new Date(r.created_at).getTime(),deleted:!!r.deleted,u:Number(r.updated_at)}},
   async fetchAll(table){
     const sb=this.sb();if(!sb)throw new Error('no client');
     const all=[];let from=0;
@@ -1265,7 +1271,7 @@ function habitRow(h,k){
   if(h.kind==='check')ctl='<button class="hchk'+(done?' on':'')+'" data-htog="'+h.id+'" aria-pressed="'+done+'" aria-label="'+esc(h.name)+' done today">'+(done?'✓':'')+'</button>';
   else if(h.kind==='count')ctl='<div class="hcount"><button data-hstep="'+h.id+'" data-d="-1" aria-label="Less '+esc(h.name)+'">−</button><input type="number" inputmode="decimal" min="0" step="any" data-hval="'+h.id+'" value="'+(v||'')+'" placeholder="0" aria-label="'+esc(h.name)+' today"><button data-hstep="'+h.id+'" data-d="1" aria-label="More '+esc(h.name)+'">+</button></div>';
   else ctl='<span class="hauto" title="Filled in from your timer" aria-hidden="true">'+(done?'✓':'')+'</span>';
-  const meta=[st.cur?st.cur+' day streak':'',st.rate!=null?Math.round(st.rate*100)+'% in the last 30 days':''].filter(Boolean).join(' · ');
+  const meta=[st.cur?st.cur+' day streak':'',st.rate!=null?Math.round(st.rate*100)+'% in the last 30 days':'',h.remind?'reminder '+h.remind:''].filter(Boolean).join(' · ');
   return '<div class="hrow'+(done?' done':'')+'">'+ctl+'<div class="hmain"><div class="hline"><button class="hname" data-hedit="'+h.id+'">'+esc(h.name)+'</button>'+(h.kind==='focus'?'<span class="pill">from timer'+(h.tag&&tagOf(h.tag)?': '+esc(tagName(h.tag)):'')+'</span>':'')+(done?'<span class="pill ok">Done</span>':'')+'</div>'
     +'<div class="hmeta">'+(h.kind==='check'?'':'<span class="hamt">'+fmtAmt(h,v)+' / '+fmtAmt(h,t)+'</span>')+(meta?'<span>'+meta+'</span>':'')+'</div>'
     +(h.kind==='check'?'':'<div class="hbar"><span style="width:'+(clamp(v/t,0,1)*100).toFixed(1)+'%"></span></div>')+'</div></div>'}
@@ -1309,6 +1315,7 @@ function openHabit(id,preset){
   $('#hmTarget').value=h&&h.kind==='count'?h.target:p.kind==='count'?p.target:'';
   $('#hmUnit').value=h&&h.kind==='count'?h.unit:p.unit||'';
   $('#hmHours').value=h&&h.kind==='focus'?h.target/60:p.kind==='focus'?p.target/60:'';
+  $('#hmRemind').value=h&&h.remind||'';renderReminderUI();
   $('#hmDel').hidden=!h;$('#hmErr').hidden=true;renderHM();$('#hModal').hidden=false;setTimeout(()=>$('#hmName').focus(),30)}
 function renderHM(){
   $$('#hmKind button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.k===HM.kind)));
@@ -1324,11 +1331,53 @@ function saveHM(){
   let target=1,unit='';
   if(HM.kind==='count'){target=parseFloat($('#hmTarget').value);unit=$('#hmUnit').value.trim().slice(0,20);if(!(target>0&&target<=100000))return fail('Set a daily target above 0.')}
   if(HM.kind==='focus'){const hrs=parseFloat($('#hmHours').value);if(!(hrs>0&&hrs<=16))return fail('Set the focus hours per day, up to 16.');target=Math.round(hrs*60)}
+  const remind=$('#hmRemind').value||null;if(remind&&!/^\d{2}:\d{2}$/.test(remind))return fail('Pick a reminder time, or choose No reminder.');
   const old=HM.id?findH(HM.id):null;
-  const h=Object.assign(old||{id:uid(),created:Date.now(),deleted:false,sort:habitsLive().length},{name:name.slice(0,60),kind:HM.kind,target,unit,days:HM.days,tag:HM.kind==='focus'?HM.tag||null:null});
+  const h=Object.assign(old||{id:uid(),created:Date.now(),deleted:false,sort:habitsLive().length},{name:name.slice(0,60),kind:HM.kind,target,unit,days:HM.days,tag:HM.kind==='focus'?HM.tag||null:null,remind});
   saveHabit(h);closeHM();renderHabits();toast(old?'Habit updated':'Habit added')}
 function deleteHM(){const h=findH(HM.id);if(!h)return;h.deleted=true;saveHabit(h);closeHM();renderHabits();
   toast('Habit deleted','Undo',()=>{h.deleted=false;saveHabit(h);renderHabits();toast('Habit restored')})}
+
+/* habit reminders: web push on this device (the server decides when; see supabase/functions/send-reminders) */
+const VAPID_PUBLIC='BFYBKV7xpkH4hz6Lz0Xn-A-1ZFrnl37756UPSmEtPm9CqGa-iJF3ccxNj9EPafzkrcioRUbFwru_TkT62qIZEgw';
+const pushOK=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+let swReg=null,pushSub=null;
+function b64u(str){const pad='='.repeat((4-str.length%4)%4),raw=atob((str+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(raw,c=>c.charCodeAt(0))}
+async function initPush(){
+  if(!('serviceWorker' in navigator))return;
+  try{swReg=await navigator.serviceWorker.register('/sw.js');pushSub=swReg.pushManager?await swReg.pushManager.getSubscription():null;if(pushSub&&authUser)savePushSub(pushSub)}
+  catch(e){console.warn('Service worker unavailable:',e&&e.message)}
+  renderReminderUI()}
+async function savePushSub(sub){
+  if(!authClient||!authUser||!sub)return false;const j=sub.toJSON(),tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+  const {error}=await authClient.from('push_subscriptions').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,tz,updated_at:new Date().toISOString()},{onConflict:'endpoint'});
+  if(error){console.warn('Could not save this device for reminders:',error.message);return false}return true}
+async function remindersOn(){
+  if(!authUser){toast('Sign in first, so reminders know which habits are yours');return}
+  if(!pushOK()){toast(isIOS()&&!isStandalone()?'On iPhone, add Flowmeter to your Home Screen first':'This browser cannot show notifications');renderReminderUI();return}
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){toast('Notifications are blocked. Allow them in your phone or browser settings.');renderReminderUI();return}
+    swReg=swReg||await navigator.serviceWorker.register('/sw.js');await navigator.serviceWorker.ready;
+    pushSub=await swReg.pushManager.getSubscription()||await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUBLIC)});
+    toast(await savePushSub(pushSub)?'Reminders are on for this device':'Could not turn on reminders. Try again.');
+  }catch(e){toast('Could not turn on reminders: '+((e&&e.message)||'unknown error'))}
+  renderReminderUI()}
+async function remindersOff(silent){
+  try{if(pushSub){const ep=pushSub.endpoint;if(authClient&&authUser)await authClient.from('push_subscriptions').delete().eq('endpoint',ep);await pushSub.unsubscribe()}}catch(e){console.warn('Turning reminders off:',e&&e.message)}
+  pushSub=null;if(!silent)toast('Reminders are off for this device');renderReminderUI()}
+function renderReminderUI(){
+  const st=$('#remState'),on=$('#remOn'),off=$('#remOff');let msg,can=true;
+  if(isIOS()&&!isStandalone()){msg='On iPhone: tap Share, then "Add to Home Screen", and open Flowmeter from your Home Screen. Then turn reminders on here.';can=false}
+  else if(!pushOK()){msg='This browser cannot show notifications.';can=false}
+  else if(!authUser){msg='Sign in to get reminders for your habits.';can=false}
+  else if(Notification.permission==='denied'){msg='Notifications are blocked for Flowmeter. Allow them in your phone or browser settings, then come back here.';can=false}
+  else if(pushSub)msg="On for this device. At each habit's reminder time you get a notification, but only if the habit isn't done yet.";
+  else msg="Get a notification at the time you pick for each habit, only if it isn't done yet. Set the time when you edit a habit.";
+  st.textContent=msg;on.hidden=!can||!!pushSub;off.hidden=!pushSub;
+  $('#hmRemindHint').textContent=pushSub?'':'To get it on your phone, open Settings on that device and turn on habit reminders.'}
 
 /* account (Supabase auth + sync) */
 const SUPABASE_URL='https://tdgufuwotovstrkbllwm.supabase.co';
@@ -1357,13 +1406,14 @@ async function authAction(mode){
 function initAuth(){
   if(typeof supabase==='undefined'||!supabase.createClient){$('#authSec').hidden=true;return}
   authClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  const setUser=u=>{authUser=u;renderAuthUI();store.onAuthUser(u)};
+  const setUser=u=>{authUser=u;renderAuthUI();store.onAuthUser(u);if(u&&pushSub)savePushSub(pushSub);renderReminderUI()};
   authClient.auth.getSession().then(({data:{session}})=>setUser(session&&session.user||null));
   authClient.auth.onAuthStateChange((_e,session)=>setUser(session&&session.user||null));
   $('#authSignIn').addEventListener('click',()=>authAction('in'));
   $('#authSignUp').addEventListener('click',()=>authAction('up'));
   $('#authSignOut').addEventListener('click',async()=>{
     if(!authClient||authBusy)return;setAuthBusy(true);showAuthErr('');
+    await remindersOff(true);
     const {error}=await authClient.auth.signOut();setAuthBusy(false);
     if(error)showAuthErr(error.message);
   });
@@ -1378,6 +1428,7 @@ function renderSettings(){
   $('#longEvery').disabled=st.longBrk===0;$('#autoNext').checked=!!st.autoNext;$('#zenAuto').checked=!!st.zenAuto;$('#soundChk').checked=!!st.sound;$('#noiseChk').checked=!!st.noise;
   $('#tagList').innerHTML=(st.tags.length?st.tags.map(t=>'<div class="tr"><button class="dot" data-tcol="'+t.id+'" style="background:'+t.color+'" aria-label="Change colour of '+esc(t.name)+'"></button><input type="text" data-tname="'+t.id+'" value="'+esc(t.name)+'" maxlength="24" aria-label="Tag name"><button class="del" data-tdel="'+t.id+'">Remove</button></div>').join(''):'<span class="hint">No tags yet.</span>')+'<div class="tr"><input type="text" id="newTag" maxlength="24" placeholder="New tag name and Enter"></div>';
   $('#syncState').textContent=syncLabel;
+  renderReminderUI();
 }
 function openSettings(){renderSettings();$('#setModal').hidden=false;setTimeout(()=>$('#setClose').focus(),30)}
 function closeSettings(){$('#setModal').hidden=true;renderAll()}
@@ -1565,6 +1616,9 @@ $('#sHours').addEventListener('click',e=>{const c=e.target.closest('[data-go]');
 $('#sWhen').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(b&&!isDemo())openEditor(b.dataset.id)});
 $('#sLog').addEventListener('click',e=>{const d=e.target.closest('[data-edit]');if(d)openEditor(d.dataset.edit)});
 $('#hAdd').addEventListener('click',()=>openHabit(null));
+$('#hmRemindClear').addEventListener('click',()=>{$('#hmRemind').value=''});
+$('#remOn').addEventListener('click',remindersOn);
+$('#remOff').addEventListener('click',()=>remindersOff(false));
 $('#tab-habits').addEventListener('click',e=>{
   const c=e.target.closest('[data-hcell]');if(c){toggleDay(c.dataset.hcell,c.dataset.k);return}
   const ed=e.target.closest('[data-hedit]');if(ed){openHabit(ed.dataset.hedit);return}
@@ -1605,7 +1659,8 @@ document.addEventListener('keydown',e=>{
 /* boot */
 if(S.run&&S.run.phase==='break'&&Date.now()>=S.run.endsAt){S.run.phase='breakEnd';saveRun()}
 (function(){let ch=false;S.settings.tags.forEach(t=>{const c=inkTag(t.color);if(c!==t.color){t.color=c;ch=true}});if(ch)saveSettings()})();
-initAuth();renderAll();store.init();setTimeout(()=>{if(!authUser)maybeOnboard()},1500);
+initAuth();renderAll();store.init();initPush();
+(function(){const q=new URLSearchParams(location.search);if(q.get('tab')==='habits'){setTab('habits');history.replaceState(null,'',location.pathname)}})();setTimeout(()=>{if(!authUser)maybeOnboard()},1500);
 })();
 </script>
 

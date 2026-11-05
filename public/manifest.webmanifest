@@ -1,7 +1,7 @@
 {
   "name": "Flowmeter",
   "short_name": "Flowmeter",
-  "description": "A calm focus timer that turns your work into ink paintings.",
+  "description": "A focus timer and habit tracker that logs exactly how much you work, and when.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
